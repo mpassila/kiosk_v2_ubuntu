@@ -22,7 +22,7 @@ const devtoolsConfig =
       }
     : {};
 
-const configuration: webpack.Configuration = {
+const mainConfig: webpack.Configuration = {
   ...devtoolsConfig,
 
   mode: 'production',
@@ -31,7 +31,6 @@ const configuration: webpack.Configuration = {
 
   entry: {
     main: path.join(webpackPaths.srcMainPath, 'main.ts'),
-    preload: path.join(webpackPaths.srcMainPath, 'preload.js'),
   },
 
   output: {
@@ -79,4 +78,45 @@ const configuration: webpack.Configuration = {
   },
 };
 
-export default merge(baseConfig, configuration);
+const preloadConfig: webpack.Configuration = {
+  ...devtoolsConfig,
+
+  mode: 'production',
+
+  target: 'electron-preload',
+
+  entry: {
+    preload: path.join(webpackPaths.srcMainPath, 'preload.js'),
+  },
+
+  output: {
+    path: webpackPaths.distMainPath,
+    filename: '[name].js',
+  },
+
+  optimization: {
+    minimizer: [
+      new TerserPlugin({
+        parallel: true,
+      }),
+    ],
+  },
+
+  plugins: [
+    new webpack.EnvironmentPlugin({
+      NODE_ENV: 'production',
+      DEBUG_PROD: false,
+      START_MINIMIZED: false,
+    }),
+  ],
+
+  node: {
+    __dirname: false,
+    __filename: false,
+  },
+};
+
+export default [
+  merge(baseConfig, mainConfig),
+  merge(baseConfig, preloadConfig),
+];

@@ -8,8 +8,9 @@ echo "========================================"
 echo "Installing kiosk dependencies (production only)"
 echo "========================================"
 
-cd "$KIOSK_DIR"
+cd "$SCRIPT_DIR"
 git pull
+cd "$KIOSK_DIR"
 npm install --omit=dev --ignore-scripts
 
 echo ""

@@ -1540,6 +1540,11 @@ const createWindow = async () => {
       }
       mainWindow.show();
     }
+
+    // Open DevTools if --devtools flag or DEVTOOLS env is set
+    if (process.argv.includes('--devtools') || process.env.DEVTOOLS) {
+      mainWindow.webContents.openDevTools();
+    }
   });
 
   // Open urls in the user's browser

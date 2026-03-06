@@ -3,7 +3,7 @@ import path from 'path';
 
 export const SIDE_EVENTS_DIR = process.platform === 'win32'
   ? 'C:\\SideEvents'
-  : path.join(os.homedir(), 'SideEvents');
+  : '/home/ubuntu/SideEvents';
 
 export const LOCAL_CONFIG_PATH = path.join(SIDE_EVENTS_DIR, 'localConfig.json');
 export const SERVICE_CONFIG_PATH = path.join(SIDE_EVENTS_DIR, 'localServiceConfig.json');

@@ -1,0 +1,47 @@
+Fresh Ubuntu Image Setup for Kiosk (aarch64/arm64)
+===================================================
+
+0. Fix dpkg if apt fails with "Problem parsing dependency" or "MergeList" error
+   sudo cp /var/lib/dpkg/status-old /var/lib/dpkg/status
+   sudo apt update
+
+1. System dependencies (Electron/Chromium + X server)
+   sudo apt install -y libnss3 libnspr4 libatk1.0-0 libatk-bridge2.0-0 libcups2 libdrm2 libxkbcommon0 libxcomposite1 libxdamage1 libxrandr2 libgbm1 libpango-1.0-0 libcairo2 libasound2t64
+   sudo apt install -y xorg xinit
+
+2. Node.js 22
+   curl -fsSL https://deb.nodesource.com/setup_22.x | sudo -E bash -
+   sudo apt install -y nodejs
+
+3. Electron
+   sudo npm install -g electron
+
+4. Git config
+   git config --global pull.rebase true
+
+5. Serial port access (barcode scanner)
+   sudo usermod -aG dialout ubuntu
+   (log out and back in for group change to take effect)
+
+6. Clone & setup
+   cd ~
+   mkdir -p SideEvents
+   cd SideEvents
+   git clone https://github.com/mpassila/kiosk_v2_ubuntu.git .
+   chmod +x setup.sh install.sh start.sh
+   ./setup.sh
+
+7. Create localConfig.json
+   Edit ~/SideEvents/localConfig.json with device config
+   Example: { "width": 768, "height": 1024 }
+
+8. Start
+   ./start.sh
+   (runs git pull, npm install, then launches X + Electron)
+
+Troubleshooting
+===============
+- "libnspr4.so not found" or similar: step 1 was skipped or failed, re-run it
+- "Permission denied" on /dev/ttymxc*: step 5 not applied, or need to re-login
+- X server won't start: check /var/log/Xorg.0.log
+- Screen goes blank/sleeps: re-run ./setup.sh

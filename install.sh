@@ -13,6 +13,9 @@ git pull
 cd "$KIOSK_DIR"
 npm install --omit=dev --ignore-scripts
 
+cd "$KIOSK_DIR/release/app"
+npm install --omit=dev --ignore-scripts
+
 echo ""
 echo "========================================"
 echo "Install complete!"

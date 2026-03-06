@@ -17,6 +17,7 @@ Section "ServerFlags"
 EndSection
 
 Section "ServerLayout"
+    Identifier "Default Layout"
     Option "BlankTime" "0"
     Option "StandbyTime" "0"
     Option "SuspendTime" "0"

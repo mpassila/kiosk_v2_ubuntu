@@ -24,8 +24,16 @@ let timeoutTimer;
 let port;
 let scanResults = {};
 
-// Load localConfig from c:\SideEvents\localConfig.json
-// This is loaded once at preload time and exposed to renderer
+// Load localConfig from platform-specific SideEvents directory
+// Windows: C:\SideEvents\localConfig.json
+// Linux:   ~/SideEvents/localConfig.json
+const os = require('os');
+const pathModule = require('path');
+
+const sideEventsDir = process.platform === 'win32'
+  ? 'C:\\SideEvents'
+  : pathModule.join(os.homedir(), 'SideEvents');
+
 const defaultLocalConfig = {
   width: 1920,
   height: 1080,
@@ -41,7 +49,7 @@ const defaultLocalConfig = {
 };
 
 let loadedLocalConfig = { ...defaultLocalConfig };
-const localConfigPath = 'C:\\SideEvents\\localConfig.json';
+const localConfigPath = pathModule.join(sideEventsDir, 'localConfig.json');
 
 try {
   if (fs.existsSync(localConfigPath)) {
@@ -55,9 +63,8 @@ try {
   } else {
     console.log('PRELOAD: localConfig.json not found at', localConfigPath, '- using defaults');
     // Create the file with defaults
-    const dir = 'C:\\SideEvents';
-    if (!fs.existsSync(dir)) {
-      fs.mkdirSync(dir, { recursive: true });
+    if (!fs.existsSync(sideEventsDir)) {
+      fs.mkdirSync(sideEventsDir, { recursive: true });
     }
     fs.writeFileSync(localConfigPath, JSON.stringify(defaultLocalConfig, null, 2));
     console.log('PRELOAD: Created default localConfig.json at:', localConfigPath);

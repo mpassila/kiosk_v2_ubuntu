@@ -11,8 +11,7 @@ import fs from 'fs';
 import http from 'http';
 import log from 'electron-log';
 import { BrowserWindow } from 'electron';
-
-const SERVICE_CONFIG_PATH = 'c:\\SideEvents\\localServiceConfig.json';
+import { SERVICE_CONFIG_PATH } from './paths';
 
 interface DoorStatus {
   index: string;

@@ -5,9 +5,9 @@
 
 import log from 'electron-log';
 import * as fs from 'fs';
+import { LOCAL_CONFIG_PATH } from './paths';
 
 const LOCKER_URL = 'http://localhost:3001';
-const LOCAL_CONFIG_PATH = 'C:\\SideEvents\\localConfig.json';
 
 function readDelayOnIsDoorOpen(): number {
   try {

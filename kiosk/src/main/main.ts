@@ -14,6 +14,7 @@ import { app, BrowserWindow, shell, ipcMain } from 'electron';
 import { autoUpdater } from 'electron-updater';
 import log from 'electron-log';
 import { resolveHtmlPath } from './util';
+import { SIDE_EVENTS_DIR, LOCAL_CONFIG_PATH as LOCAL_CONFIG, LOGS_DIR, CHECKOUT_MANIFEST_PATH, CHECKOUT_HISTORY_PATH, BACKUP_FILES_PATH, BACKUP_LICENSE_PATH, BACKUP_DEVICE_PATH, BACKUP_INTEGRATIONS_PATH } from './paths';
 import config from '../../config';
 import { Promise } from "bluebird";
 import { getLockerStatus, openLockerDoor } from './lockerService';
@@ -41,7 +42,7 @@ const getmac = require('getmac');
 let mainWindow: BrowserWindow | null = null;
 
 // Load localConfig.json to check for testIsOfflineMode and testmode
-const localConfigPath = 'C:\\SideEvents\\localConfig.json';
+const localConfigPath = LOCAL_CONFIG;
 let localConfig: any = { testIsOfflineMode: false, testmode: false };
 try {
   if (fs.existsSync(localConfigPath)) {
@@ -85,7 +86,7 @@ export default class AppUpdater {
   constructor() {
     log.transports.file.level = 'info';
     log.transports.file.resolvePathFn = (variables: any) =>
-      path.join('C:\\SideEvents\\logs', variables.fileName);
+      path.join(LOGS_DIR, variables.fileName);
     autoUpdater.logger = log;
     autoUpdater.checkForUpdatesAndNotify();
 
@@ -113,7 +114,7 @@ ipcMain.handle('setMainOfflineMode', (_event, offline: boolean) => {
 });
 
 // Checkout manifest for offline Hold mode
-const CHECKOUT_MANIFEST_PATH = 'C:\\SideEvents\\checkoutManifest.json';
+// CHECKOUT_MANIFEST_PATH imported from paths.ts
 
 ipcMain.handle('appendCheckoutManifest', async (_event, lockerObject: any) => {
   try {
@@ -158,7 +159,7 @@ ipcMain.handle('clearCheckoutManifest', async () => {
   }
 });
 
-const CHECKOUT_HISTORY_PATH = 'C:\\SideEvents\\historyOfCheckoutManifestLockers.json';
+// CHECKOUT_HISTORY_PATH imported from paths.ts
 
 ipcMain.handle('removeFirstFromCheckoutManifest', async () => {
   try {
@@ -322,7 +323,7 @@ ipcMain.on("rtdbPub", async (_event, input) => {
 // MUST be registered early, before app.whenReady()
 // Includes offline backup support - saves to bu_files.json and reads from backup on failure
 console.log('MAIN: downloadFile IPC handler');
-const BACKUP_FILES_PATH = 'C:\\SideEvents\\bu_files.json';
+// BACKUP_FILES_PATH imported from paths.ts
 
 // Helper to load backup files index
 function loadBackupFilesIndex(): Record<string, { base64: string; fileName: string; savedAt: string }> {
@@ -339,7 +340,7 @@ function loadBackupFilesIndex(): Record<string, { base64: string; fileName: stri
 
 // Helper to ensure backup directory exists
 function ensureBackupDirectoryExists(): void {
-  const backupDir = 'C:\\SideEvents';
+  const backupDir = SIDE_EVENTS_DIR;
   if (!fs.existsSync(backupDir)) {
     fs.mkdirSync(backupDir, { recursive: true });
     console.log(`MAIN: backup directory: ${backupDir}`);
@@ -445,7 +446,7 @@ ipcMain.handle('downloadFile', async (_event, url: string, fileName: string) => 
 // IPC handler to load license from Firebase Firestore
 // Includes offline backup support - saves to bu_license.json and reads from backup on failure
 console.log('MAIN: loadLicenseFromFirestore IPC handler');
-const BACKUP_LICENSE_PATH = 'C:\\SideEvents\\bu_license.json';
+// BACKUP_LICENSE_PATH imported from paths.ts
 
 // Store the current license database URL for use by other main process functions
 let currentLicenseDatabaseUrl: string | null = null;
@@ -663,7 +664,7 @@ ipcMain.handle('getLicenseDatabaseUrl', async () => {
 // Main process loads device and sends updates to renderer
 // Includes offline backup support - saves to bu_device.json and reads from backup on failure
 console.log('MAIN: loadDeviceFromFirebase IPC handler');
-const BACKUP_DEVICE_PATH = 'C:\\SideEvents\\bu_device.json';
+// BACKUP_DEVICE_PATH imported from paths.ts
 
 // Helper to save device backup
 function saveDeviceBackup(device: any): void {
@@ -1016,7 +1017,7 @@ ipcMain.handle('updateDeviceTheDoorsInFirebase', async (_event, licenseId: strin
 // IPC handler to load integrations from Firebase Realtime DB
 // Includes offline backup support - saves to bu_integrations.json and reads from backup on failure
 console.log('MAIN: loadIntegrations IPC handler');
-const BACKUP_INTEGRATIONS_PATH = 'C:\\SideEvents\\bu_integrations.json';
+// BACKUP_INTEGRATIONS_PATH imported from paths.ts
 
 // Helper to save integrations backup
 function saveIntegrationsBackup(integrations: any, licenseId: string): void {
@@ -1304,8 +1305,8 @@ ipcMain.handle('updateLocalConfigMacs', async (_event, macsString: string, integ
     const fs = require('fs');
     const path = require('path');
 
-    // Path to localConfig.json - always use c:\SideEvents\localConfig.json for both prod and dev
-    const localConfigPath = 'C:\\SideEvents\\localConfig.json';
+    // Path to localConfig.json - uses platform-specific SideEvents directory
+    const localConfigPath = LOCAL_CONFIG;
 
     console.log(`MAIN: path: ${localConfigPath}`);
 

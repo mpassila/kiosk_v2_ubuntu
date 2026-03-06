@@ -14,12 +14,12 @@ const defaultLocalConfig = {
   testmode: false
 };
 
-// Load localConfig from c:\SideEvents\localConfig.json
-// This path is used for both prod and dev mode
+// Load localConfig from platform-specific SideEvents directory
+// Windows: C:\SideEvents\localConfig.json | Linux: ~/SideEvents/localConfig.json
 let localConfig: any = { ...defaultLocalConfig };
 
 // Renderer process: use window.electronAPI.getLocalConfig() exposed via preload
-// The preload script loads from C:\SideEvents\localConfig.json and exposes it
+// The preload script loads from the platform-specific SideEvents directory and exposes it
 try {
   if (typeof window !== 'undefined') {
     const electronAPI = (window as any).electronAPI;

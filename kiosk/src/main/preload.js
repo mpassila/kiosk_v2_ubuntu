@@ -11,12 +11,15 @@
 /* eslint-disable @typescript-eslint/no-shadow */
 
 const { contextBridge, ipcRenderer, remote } = require('electron');
-const si = require('systeminformation');
-const cmd = require('node-cmd');
-const moment = require('moment');
-const getmac = require('getmac');
-const { SerialPort } = require('serialport');
 const fs = require('fs');
+const moment = require('moment');
+
+// Optional native modules - may not be available on all platforms
+let si, cmd, getmac, SerialPort;
+try { si = require('systeminformation'); } catch (e) { console.warn('PRELOAD: systeminformation not available:', e.message); }
+try { cmd = require('node-cmd'); } catch (e) { console.warn('PRELOAD: node-cmd not available:', e.message); }
+try { getmac = require('getmac'); } catch (e) { console.warn('PRELOAD: getmac not available:', e.message); }
+try { ({ SerialPort } = require('serialport')); } catch (e) { console.warn('PRELOAD: serialport not available:', e.message); }
 let serialPortData = null;
 let isConnected = false;
 let init = true;

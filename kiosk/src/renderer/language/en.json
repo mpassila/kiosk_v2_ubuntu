@@ -1,0 +1,311 @@
+{
+  "EXPRESS_MODE_STAFF_PATRON_KEY_0": "Charge privileges denied",
+  "EXPRESS_MODE_STAFF_PATRON_KEY_1": "Renewal privileges denied",
+  "EXPRESS_MODE_STAFF_PATRON_KEY_2": "Recall privileges denied",
+  "EXPRESS_MODE_STAFF_PATRON_KEY_3": "Hold privileges denied",
+  "EXPRESS_MODE_STAFF_PATRON_KEY_4": "Card reported lost",
+  "EXPRESS_MODE_STAFF_PATRON_KEY_5": "Too many items charged",
+  "EXPRESS_MODE_STAFF_PATRON_KEY_6": "Too many items overdue",
+  "EXPRESS_MODE_STAFF_PATRON_KEY_7": "Too many renewals",
+  "EXPRESS_MODE_STAFF_PATRON_KEY_8": "Too many claims of items returned",
+  "EXPRESS_MODE_STAFF_PATRON_KEY_9": "Too many items lost",
+  "EXPRESS_MODE_STAFF_PATRON_KEY_10": "Excessive outstanding fines",
+  "EXPRESS_MODE_STAFF_PATRON_KEY_11": "Excessive outstanding fees",
+  "EXPRESS_MODE_STAFF_PATRON_KEY_12": "Recall overdue",
+  "EXPRESS_MODE_STAFF_PATRON_KEY_13": "Too many items billed",
+
+  "ADMIN_EXIT": "Exit",
+  "ADMIN_BARCODE": "Barcode {{barcode}}",
+  "ADMIN_LASTBARCODE": "Last barcode {{barcode}}",
+  "ADMIN_OPENALLDOORS": "Open all doors",
+  "ADMIN_EXPIREDHOLDS_AUTO": "Found {{count}} expired hold lockers",
+  "ADMIN_EXPIREDHOLD_AUTO": "Found one expired hold locker",
+  "ADMIN_EXPIREDHOLDS_HANDPICK": "Found {{count}} expired hold lockers",
+  "ADMIN_EXPIREDHOLD_HANDPICK": "Found one expired hold locker",
+  "FOO": "This is foo bar",
+  "DEVICE_OUTOFORDER": "This device is out of service",
+  "RELOADTIMER": "Will reload",
+  "CONFIRM_OPENALLDOORS": "You are about to open all {{count}} doors. Please click confirm to continue",
+  "CONFIRM_ONEEXPIRED_AUTO": "You are about to remove one expired hold locker",
+  "CONFIRM_ALLEXPIRED_AUTO": "You are about to remove {{count}} expired hold lockers",
+  "CONFIRM_ONEEXPIRED_HANDPICK": "You are about to remove one expired hold locker",
+  "CONFIRM_ALLEXPIRED_HANDPICK": "You are about to remove one by one {{count}} expired hold lockers",
+  "CONFIRM": "Confirm",
+  "CLICK_CONFIRM_TO_CONTINUE": "Click confirm to continue",
+  "EXIT": "Exit",
+  "CANCEL": "Cancel",
+  "CONTINUE": "Continue",
+  "ADMIN": {
+    "CLEANUP": {
+      "DOOR_STATUS": "Door status",
+      "DOOR_REOPEN": "Click to reopen",
+      "DOOR_REOPEN_ALL": "Reopen all doors",
+      "CANCELLED_HOLDS_ITEMS_STAY": "Keep {{count}} hold holds",
+      "CANCELLED_HOLDS_ITEMS_REMOVE": "Remove {{count}} hold items",
+      "EXPIRED_HOLDS_ITEMS_STAY": "Keep {{count}} holds",
+      "EXPIRED_HOLDS_ITEMS_REMOVE": "Remove {{count}}, expired holds",
+      "EXPIRED_HOLDS_LOCKERS_REMOVE": "Remove {{count}}, expired lockers",
+      "CONFIRM_CLEANUP_ACTION": "Please click confirm to continue",
+      "REMOVE_ALL_EXPIRED_INFO": "Remove all expired hold items from all opened doors",
+      "REMOVE_ALL_CANCELLED_TILE": "Remove all cancelled holds",
+      "REMOVE_ALL_CANCELLED_BODY": "You are about to remove cancelled hold items. Doors are processed one by one. Please follow the instructions on the screen.",
+      "REMOVE_ALL_EXPIRED_SMART_CONSOLIDATION_INFO": "Only remove the listed expired hold items, keep other",
+      "REMOVE_ALL_CANCELLED_INFO": "Only remove the listed cancelled hold items, keep other",
+      "REMOVE_ALL_EXPIRED_SMART_CONSOLIDATION_TILE": "Remove all expired (smart consolidation)",
+      "REMOVE_ALL_EXPIRED_SMART_CONSOLIDATION_BODY": "You are about to remove all expired hold items. Doors are processed one by one. Follow the instructions on the screen",
+      "REMOVE_ALL_EXPIRED_TILE": "Remove all expired",
+      "REMOVE_ALL_EXPIRED_BODY": "You are about to remove all expired hold items. All doors are automatically opened"
+    },
+    "CANCELLED_HOLDS": "Cancelled holds",
+    "EXPIRED_HOLDS": "Expired holds",
+    "REMOVE_TITLES_FROM_LOCKER": "Remove following titles from the locker #{{locker}}",
+    "ALLCANCELLED_HANDPICK": "You are about to remove all cancelled holds items from {{count}} lockers",
+    "ONECANCELLED_HANDPICK": "You are about to remove all cancelled hold items from one locker",
+    "CLEAN_SELECTED_DOOR": "Remove all content from expired hold locker #{{door}}",
+    "CLICK_CONTINUE_TO_CLEAN_SELECTED_DOOR": "Close door or click continue to clean selected, cancel to exit cleaup",
+    "ADMIN_OPENDOOR": "Open door #{{door}}",
+    "CONFIRM_OPENDOOR": "You are about to open door #{{door}}. Please click confirm to continue",
+    "CONFIRM_REMOVEALL": "You are about to remove expired hold items from {{count}} lockers. Please click confirm to continue and open related doors",
+    "CONFIRM_REMOVEALL_HANDPICK": "You are about to remove expired hold items from {{count}} lockers. Please click confirm to continue and open related doors",
+    "CONFIRM_REMOVEALL_AUTO": "You are about to remove expired hold items from {{count}} lockers. Please click confirm to continue and open related doors",
+
+    "DOORS": "All {{count}} doors",
+    "SCANNER": {
+      "TITLE": "Scanners and readers",
+      "DESCRIPTION": "Test a connected scanner reader. Read result are shown 2 seconds before moved to last barcode"
+    },
+      "DOOR": {
+        "LEFTBEHIND": "Left behind",
+        "LEFTBEHINDDESCRIPTION": "Cleaned up left behind items",
+
+        "ACTIONS": "The door actions",
+        "STAFFACTIONS": "Staff main actions",
+
+        "BYTYPE": "By group",
+        "BYTYPEDESCRIPTION": "By item group name",
+
+        "CHECKEDIN": "Inspection",
+        "CHECKEDINDESCRIPTION": "Awaits inspection",
+
+        "CANCELLED": "Cancelled",
+        "CANCELLEDDESCRIPTION": "Cleaned up cancelled holds",
+
+        "RETURNED": "Returned",
+        "RETURNEDDESCRIPTION": "Cleaned up returned items",
+
+        "EXPIRED": "Expired",
+        "EXPIREDDESCRIPTION": "Cleaned up expired holds",
+
+        "ALL": "Open all doors",
+        "ALLDESCRIPTION": "Open all doors",
+
+        "WITHITEMS": "Has items",
+        "WITHITEMSDESCRIPTION": "Open all doors with items",
+
+        "WITHOUTITEMS": "Empty",
+        "WITHOUTITEMSDESCRIPTION": "Open all empty doors"
+    },
+      "SETTINGS": {
+          "LANG": "Default selected language"
+        }
+  },
+  "ERROR": {
+    "RETURN_TO_ITEMTYPE_NOT_ALLOWED":"Return an item, as type \"{{itemType}}\" is not allowed to return on this locker",
+    "ILSERROR":"ILS integration error, with messge {{message}}",
+    "WRONGPASSWORD":"Wrong password",
+    "LOGIN_PATRONIDNOTFOUND":"Login with patron ID {{patronId}} not found",
+    "CONNECTIONTIMEOUT":"Connection timeout",
+    "LOGIN_FAILED":"Login failed",
+    "LOGIN_FAILED_BLOCKED":"Login failed — patron is blocked",
+    "LOGIN_FAILED_BARRED":"Login failed — patron is barred",
+    "DOOR_LEFT_OPEN": "One or more doors are left open",
+    "DOOR_LEFT_OPEN_DETAIL": "One or more doors are left open. Please close them before you can check out your items",
+    "NO_ITEMS_ON_SELECTED_ITEMGROUP": "No items on selected item group",
+    "TIMER": "Timer..",
+    "VIEW": "Error view",
+    "DESC": "Error message detail from the locker system"
+  },
+  "SAAS": {
+    "USERNAME_PLACEHOLDER": "username / patron",
+    "PASSWORD_PLACEHOLDER": "password / PIN",
+    "HOLD_REQUESTED": "Hold requested",
+    "HOLD_REQUEST_MESSAGE": "A hold has been requested for you. Please check your email for more details.",
+    "HOLD_REQUEST_SENT": "Hold request sent to the library. Please check your email for more details.",
+    "DEVICE_MAINTENANCE": "Maintenance",
+    "DEVICE_MAINTENANCE_MESSAGE": "This device is under maintenance. Please try again later.",
+    "ENTER_ADMIN_PIN": "Enter admin PIN",
+    "ENTER_ADMIN_PIN_DESCRIPTION": "Access to admin mode",
+    "LOTIN": "Login",
+    "REOPEN_DOOR": "Re-open door {{door}}",
+    "REOPEN_DOORS": "Re-open doors {{doors}}",
+    "SELECT": "Select",
+    "CHANGE_LANGUAGE": "Change language",
+    "CHANGE_LANGUAGE_DESCRIPTION": "Change the language of the application",
+    "REPORT": {
+      "TITLE": "Checkout report, select row if you want to report condition to staff",
+      "DETAILS":"Please check the thing condition before finalizing the checkout",
+      "THING": {
+        "CONDITION": "Condition",
+        "NOTES": "Notes",
+        "IMAGE": "Image"
+      },
+      "SEND_MESSAGE": "Write a note"
+
+    },
+
+
+    "LOT_OUT": "Logout",
+    "CHECKED_OUT": "Checked out",
+    "PLACE_A_HOLD": "Place a hold",
+    "EXIT": "Exit",
+    "LOGIN": "LOGIN",
+
+    "WELCOME_TO_LOT": "Welcome to Library of Things",
+    "WELCOME_TO_LOT_LOGIN": "Welcome {{name}}, please select below",
+    "LOCKER_CHECKIN_ONE_INSTRUCTIONS_FINAL": "Thank you. Please wait while we finalize your return session",
+    "LOCKER_CHECKIN_ONE_INSTRUCTIONS_REMINDER": "Make sure that you return all checked out things and close the door to finalize return",
+    "LOCKER_CHECKIN_MANY_INSTRUCTIONS_FINAL": "Thank you. Please wait while we finalize your return session",
+    "LOCKER_CHECKIN_MANY_INSTRUCTIONS_REMINDER": "Make sure that you return all checked out things and close the door to finalize return",
+    "HOLD": {
+      "PREFERENCE_SET": "Preference set to \"{{preference}}\"",
+      "PREFERENCE_0": "(default) Any locker door",
+      "PREFERENCE_1": "High on locker door",
+      "PREFERENCE_2": "Low on locker door",
+      "PREFERENCE_3": "Accessible (ADA) door",
+
+        "LOCKER_WELCOME_NEW_USER_INSTRUCTIONS": "Welcome {{patron}} to the Hold picup locker. If locker has space, please select your preference door hight or Accessable ADA locker",
+
+        "RETURNED": "Leave a hold item",
+        "RETURNED_UNDO": "Undo - Leave a hold item",
+        "LOCKER_HOLD_CONTENT_MANY": " {{count}} items",
+        "LOCKER_HOLD_CONTENT_ONE": " one item",
+        "SOME_RETURNED": "An item(s) left in locker",
+        "HOLD_INSTRUCTIONS": "Welcome {{patron}} to the Hold pickup locker. Please collect your hold items from following lockers"
+
+    },
+    "LOT": {
+      "RETURN_DESCRIPTION": "Select to return an item",
+      "GUIDE": "To start, scan your library card or select an item",
+
+      "LOCKER_WELCOME_NEW_USER_INSTRUCTIONS": "Welcome to the Library of Things.",
+
+      "RETURN_INSTRUCTIONS_TO_USER": "To return an item, {{patronId}} do scan it or return it to the library staff at the front desk",
+      "RETURN_INSTRUCTIONS": "To return an item, scan it or return it to the library staff at the front desk",
+      "RETURN_INSTRUCTIONS_NOITEMS": "No things to return into this locker",
+      "RETURNED": "Returned",
+      "CHECKED_OUT": "Checked out",
+      "CLICK_TO_RETURN1": "Click or scan",
+      "CLICK_TO_RETURN2": "to return this thing",
+      "LOCKER_HOLD_CONTENT_ONE": "One thing",
+      "LOCKER_HOLD_CONTENT_MANY": "{{count}} things",
+      "RETURN_INSTRUCTIONS_ONE": "Please return your checked out thing to opened locker",
+      "RETURN_INSTRUCTIONS_MANY": "You have {{count}} things checked out, click thing or scan its barcode to return. Finalize by closing all doors",
+      "LOGIN_AND_CHECKOUT_INFO": "Scan your library card or enter your patron ID to authenticate. <br/>Once verified, you will proceed with the <b>{{groupName}}</b> checkout — or place a hold if no items are currently available.",
+      "LOGIN_AND_CHECKOUT_INFO_PASSWORD": "Scan your library card, or enter your patron ID and password to authenticate. <br/>Once verified, you will proceed with the <b>{{groupName}}</b> checkout — or place a hold if no items are currently available.",
+      "LOGIN_TO_CHECKOUT_INFO": "Scan your library card or enter your patron ID to authenticate. <br/>Once verified, you may check out a selected item or place a hold if it is not currently available.",
+      "LOGIN_TO_CHECKOUT_INFO_PASSWORD": "Scan your library card, or enter your patron ID and password to authenticate. <br/>Once verified, you may check out a selected item or place a hold if it is not currently available."
+      },
+
+      "DOOR": {
+          "ITEM_ALREADY_REGISTERED_HTML": "<br/><b>Patron</b><br/>Login with your patron credentials to checkout holds<br/><br/><b>Staff</b><br/>Barcode {{itemId}} is already registered to door #{{door}}<br/>1. Login with your staff credentials<br/>2. Rescan item to re-open the door<br/><br/>",
+          "NUMBER": "Locker #{{door}}",
+          "REOPEN": "Re-open door",
+          "OPEN": "Door {{door}} is open",
+          "CLOSE": "Door {{door}} is closed"
+      },
+      "START_HERE": "Touch here to start or scan a card",
+      "WELCOME_PATRON": "Welcome {{name}}",
+      "LOCKER_CHECKINGOUT_INSTRUCTION_TITLE_ONE": "Checking out all {{count}} hold item, one locker .at the time.. ",
+      "LOCKER_CHECKINGOUT_INSTRUCTION_TITLE_MANY": "Checking out all {{count}} hold items, one locker .at the time.. ",
+      "LOCKER_CHECKEDOUT_INSTRUCTION_TITLE_ONE": "Checked out all {{count}} hold items",
+      "LOCKER_CHECKEDOUT_INSTRUCTION_TITLE_MANY": "Checked out all {{count}} hold items",
+      "LOCKER_CHECKOUT_INSTRUCTIONS_REMINDER": "Remember to take all items, and close the door",
+      "LOCKER_CHECKOUT_INSTRUCTIONS_FINAL": "Thank you for closing the doors. FInalising your checkout session",
+      "LOCKER_CHECKOUT_INSTRUCTIONS_NOITEMS": "Thank you for using locker, used id {{patronid}} has no hold items to check out",
+      "LOCKER_CHECKOUT_CLOSE_DOOR": "FOO",
+      "ERROR": {
+        "ILSERROR": "ILS integration error, with message {{message}}",
+        "WRONGPASSWORD": "Wrong password",
+        "LOGIN_PATRONIDNOTFOUND": "Login with patron ID {{patronId}} not found",
+        "CONNECTIONTIMEOUT": "Connection timeout",
+        "LOGIN_FAILED": "Login failed",
+        "LOGIN_FAILED_BLOCKED": "Login failed — patron is blocked",
+        "LOGIN_FAILED_BARRED": "Login failed — patron is barred",
+        "LOGIN_FAILED_FINES": "Login failed — excessive fines",
+        "LOGIN_FAILED_PRIVILEGES_DENIED": "Login failed — privileges denied"
+      }
+  },
+  "DOOR": {
+      "CLOSED": "Door closed",
+      "OPEN": "Door opened",
+      "FAILED_TO_OPEN": "Failed to open the door. Please try again or contact staff for assistance.",
+      "OPTION": "{{size}}{{type}}",
+      "SELECTED": "Locker size {{type}} {{size}} is selected",
+      "_SIZE0": "small",
+      "_SIZE1": "medium",
+      "_SIZE2": "large",
+      "_SIZE3": "xxl",
+      "SIZE0": "Small",
+      "SIZE1": "Medium",
+      "SIZE2": "Large",
+      "SIZE3": "XXL",
+      "TYPE": {
+          "NORMAL": "",
+          "ADA": " - ADA"
+      }
+  },
+  "STAFF": {
+    "PROCESSING": "Processing request with library systems...",
+    "CALL_STAFF_FOR_HELP": "Call Staff for Help",
+    "NO_EMPTY_LOCKERS": "No empty lockers available",
+    "NO_EMPTY_ADALOCKERS": "No empty ADA lockers available",
+    "NO_EMPTY_LOCKERS_INSTRUCTIONS": "Please call staff for help",
+    "NO_EMPTY_ADALOCKERS_INSTRUCTIONS": "Please call staff for help",
+    "NO_EMPTY_LOCKERS_INSTRUCTIONS_ADALOCKERS": "Please call staff for help",
+    "NO_EMPTY_LOCKERS_INSTRUCTIONS_ADALOCKERS_INSTRUCTIONS": "Please call staff for help",
+    "NO_EMPTY_LOCKERS_INSTRUCTIONS_ADALOCKERS_INSTRUCTIONS_ADALOCKERS_INSTRUCTIONS": "Please call staff for help",
+    "NO_EMPTY_LOCKERS_INSTRUCTIONS_ADALOCKERS_INSTRUCTIONS_ADALOCKERS_INSTRUCTIONS_ADALOCKERS_INSTRUCTIONS": "Please call staff for help",
+      "INFO": "Hold is for patron with ID<br/>{{patronId}}",
+      "DOOR": {
+        "_COUNT_0": "none",
+        "_COUNT_1": "first",
+        "_COUNT_2": "second",
+        "_COUNT_3": "third",
+        "_COUNT_4": "fourth",
+        "_COUNT_5": "fifth",
+        "_COUNT_6": "sixth",
+        "_COUNT_7": "seventh",
+        "_COUNT_8": "eighth",
+        "_COUNT_9": "ninth",
+        "_COUNT_10": "tenth",
+        "_COUNT_11": "eleventh",
+        "_COUNT_12": "twelfth",
+        "_COUNT_13": "thirteenth",
+        "_COUNT_14": "fourteenth",
+        "_COUNT_15": "fifteenth",
+        "_COUNT_16": "sixteenth",
+        "_COUNT_17": "seventeenth",
+        "_COUNT_18": "eighteenth",
+        "_COUNT_19": "nineteenth"
+      },
+      "DETAILS_INIT": "Place {{itemCount}} with ID <b>{{itemId}}</b> into locker #{{doorNumber}}.<br><br>If the locker is full, then choose another locker size from the below button list",
+      "DETAILS_INIT_NO_DOORS": "Place {{itemCount}} with ID <b>{{itemId}}</b> into locker #{{doorNumber}}.",
+      "NO_DOORS_LEFT": "No doors left to split this locker content",
+      "DETAILS_FINAL": "Place hold item {{itemId}} in locker #{{doorNumber}}. Locker is full, so item cannot be moved to another locker.",
+      "DETAILS_SPLIT": "New door requested, moved the last scanned hold item {{itemId}} from locker #{{oldLockerNro}} → #{{doorNumber}}."
+  },
+  "ITEM_ALREADY_IN_LOCKER": {
+    "TITLE": "Item Already in Locker",
+    "ITEM_ID": "Item ID:",
+    "LOCKER_NUMBER": "Locker Number:",
+    "STAFF_SECTION": "For Staff Members",
+    "STAFF_MESSAGE": "This item is already registered in the locker system. Click below to access the admin view and open the door.",
+    "ADMIN_ACCESS": "Access Admin View & Open Door",
+    "PATRON_SECTION": "For Patrons",
+    "PATRON_MESSAGE": "Your hold item is ready for pickup. Please scan your library card to collect it.",
+    "SCAN_CARD": "Scan Library Card"
+  },
+  "COMMON": {
+    "CLOSE": "Close"
+  }
+}

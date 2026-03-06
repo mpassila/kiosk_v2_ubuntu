@@ -1,0 +1,644 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Library of Things (LoT) Locker Kiosk - Functionality &amp; Workflow Guide</title>
+  <style>
+    :root {
+      --primary: #8e44ad;
+      --primary-dark: #6c3483;
+      --primary-light: #f4ecf7;
+      --bg: #f8f9fa;
+      --card-bg: #ffffff;
+      --text: #2c3e50;
+      --text-light: #7f8c8d;
+      --border: #e0e0e0;
+      --success: #27ae60;
+      --warning: #f39c12;
+      --danger: #e74c3c;
+      --info: #3498db;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      padding: 0;
+    }
+    .header {
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      color: white;
+      padding: 40px 0;
+      text-align: center;
+    }
+    .header h1 { font-size: 2.2em; font-weight: 700; margin-bottom: 8px; }
+    .header p { font-size: 1.1em; opacity: 0.9; }
+    .container { max-width: 960px; margin: 0 auto; padding: 30px 24px; }
+    .section { background: var(--card-bg); border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); padding: 32px; margin-bottom: 28px; }
+    .section h2 {
+      font-size: 1.5em;
+      color: var(--primary-dark);
+      margin-bottom: 18px;
+      padding-bottom: 10px;
+      border-bottom: 2px solid var(--primary);
+    }
+    .section h3 { font-size: 1.15em; color: var(--text); margin: 20px 0 10px; }
+    p, li { margin-bottom: 8px; }
+    ul, ol { padding-left: 24px; }
+
+    /* Role cards */
+    .role-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 16px; margin-top: 12px; }
+    .role-card {
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 20px;
+      text-align: center;
+      border-top: 4px solid var(--primary);
+    }
+    .role-card .role-icon { font-size: 2em; margin-bottom: 8px; }
+    .role-card h4 { color: var(--primary-dark); margin-bottom: 6px; }
+    .role-card p { font-size: 0.95em; color: var(--text-light); margin: 0; }
+
+    /* Workflow diagrams */
+    .workflow { margin: 16px 0; }
+    .workflow-step {
+      display: flex;
+      align-items: flex-start;
+      margin-bottom: 4px;
+    }
+    .step-connector {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-right: 16px;
+      min-width: 36px;
+    }
+    .step-dot {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: var(--primary);
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 0.85em;
+      flex-shrink: 0;
+    }
+    .step-line {
+      width: 3px;
+      height: 24px;
+      background: var(--primary);
+      opacity: 0.3;
+    }
+    .step-content {
+      background: var(--primary-light);
+      border-radius: 8px;
+      padding: 14px 18px;
+      flex: 1;
+      margin-bottom: 4px;
+    }
+    .step-content strong { color: var(--primary-dark); }
+    .step-content .sub { font-size: 0.9em; color: var(--text-light); margin-top: 4px; }
+
+    /* Tables */
+    table { width: 100%; border-collapse: collapse; margin: 14px 0; }
+    th, td { padding: 12px 16px; text-align: left; border-bottom: 1px solid var(--border); }
+    th { background: var(--primary-light); color: var(--primary-dark); font-weight: 600; white-space: nowrap; }
+    tr:hover td { background: #fdfaff; }
+
+    /* Feature cards */
+    .feature-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; margin-top: 12px; }
+    .feature-card {
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 20px;
+      border-left: 4px solid var(--primary);
+    }
+    .feature-card h4 { color: var(--primary-dark); margin-bottom: 8px; font-size: 1.05em; }
+    .feature-card p, .feature-card ul { font-size: 0.93em; color: var(--text-light); margin: 0; }
+    .feature-card ul { margin-top: 6px; padding-left: 18px; }
+    .feature-card li { margin-bottom: 4px; }
+
+    /* Badge / pill */
+    .badge {
+      display: inline-block;
+      padding: 2px 10px;
+      border-radius: 12px;
+      font-size: 0.8em;
+      font-weight: 600;
+      margin-right: 4px;
+    }
+    .badge-staff { background: #eaf7ef; color: var(--success); }
+    .badge-patron { background: #ebf5fb; color: var(--info); }
+    .badge-admin { background: #fef5e7; color: var(--warning); }
+
+    /* Callout boxes */
+    .callout {
+      border-radius: 8px;
+      padding: 16px 20px;
+      margin: 14px 0;
+      font-size: 0.95em;
+    }
+    .callout-info { background: #ebf5fb; border-left: 4px solid var(--info); }
+    .callout-warning { background: #fef9e7; border-left: 4px solid var(--warning); }
+    .callout-success { background: #eafaf1; border-left: 4px solid var(--success); }
+    .callout-purple { background: var(--primary-light); border-left: 4px solid var(--primary); }
+
+    /* Scan identification */
+    .scan-list { list-style: none; padding: 0; margin-top: 12px; }
+    .scan-list li {
+      display: flex;
+      align-items: center;
+      padding: 12px 16px;
+      margin-bottom: 8px;
+      border-radius: 8px;
+      background: #f7f9fa;
+      border: 1px solid var(--border);
+    }
+    .scan-list li .scan-icon { font-size: 1.5em; margin-right: 14px; }
+    .scan-list li strong { color: var(--text); }
+    .scan-list li span { font-size: 0.92em; color: var(--text-light); margin-left: 4px; }
+
+    /* Item group cards */
+    .group-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; margin: 16px 0; }
+    .group-card {
+      border: 2px solid var(--border);
+      border-radius: 10px;
+      padding: 18px 12px;
+      text-align: center;
+      font-weight: 600;
+      font-size: 0.95em;
+      color: var(--primary-dark);
+      background: var(--primary-light);
+    }
+
+    /* Comparison table */
+    .compare-table th:first-child { min-width: 160px; }
+    .compare-hold { color: #2980b9; font-weight: 600; }
+    .compare-lot { color: var(--primary-dark); font-weight: 600; }
+
+    /* Day-to-day */
+    .ops-section { margin-bottom: 18px; }
+    .ops-section h4 { color: var(--primary-dark); margin-bottom: 8px; }
+
+    .footer {
+      text-align: center;
+      padding: 24px;
+      color: var(--text-light);
+      font-size: 0.85em;
+    }
+
+    @media print {
+      .header { padding: 20px 0; }
+      .section { box-shadow: none; border: 1px solid #ddd; page-break-inside: avoid; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="header">
+    <h1>Library of Things (LoT) Locker Kiosk</h1>
+    <p>Functionality &amp; Workflow Guide</p>
+  </div>
+
+  <div class="container">
+
+    <!-- Overview -->
+    <div class="section">
+      <h2>Overview</h2>
+      <p>The Library of Things (LoT) Locker Kiosk is a self-service system that allows patrons to check out and return non-traditional library items &mdash; such as laptops, projectors, cameras, tools, and other equipment &mdash; using secure smart lockers. Unlike the Hold Locker (which is used for patron hold pickups), the LoT system supports a full <strong>checkout and return lifecycle</strong> with item groups, waivers, condition checks, and permanent locker assignments.</p>
+      <div class="callout callout-purple"><strong>Key Difference from Hold Lockers:</strong> In Hold mode, staff pre-loads items for specific patrons to pick up. In LoT mode, items live in the lockers and any eligible patron can check them out, use them, and return them &mdash; creating a lending cycle. A smart background process keeps item holds, cancellations, and availability live and up to date.</div>
+      <div class="callout callout-info"><strong>Configuration:</strong> All settings for the LoT Locker Kiosk are managed through the <strong>SideEvent SaaS</strong> management dashboard.</div>
+    </div>
+
+    <!-- Key Roles -->
+    <div class="section">
+      <h2>Key Roles</h2>
+      <div class="role-grid">
+        <div class="role-card">
+          <div class="role-icon">&#128100;</div>
+          <h4>Staff</h4>
+          <p>Load items into lockers via the add-item wizard. Select item group, door size, and patron eligibility. Inspect returned items for condition. Access the admin view for on-site actions such as configuring item groups, waivers, door sizes, condition check policies, and timers via the SideEvent dashboard.</p>
+        </div>
+        <div class="role-card">
+          <div class="role-icon">&#128187;</div>
+          <h4>Patron</h4>
+          <p>Scan their library card, browse available item groups, check out items from lockers, and return them when done.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Item Groups -->
+    <div class="section">
+      <h2>Item Groups</h2>
+      <p>Items in the LoT system are organized into <strong>groups</strong>. Each group represents a category of lendable equipment and can have its own settings for door sizes, waivers, images, and condition check rules.</p>
+      <div class="group-grid">
+        <div class="group-card">Laptops</div>
+        <div class="group-card">Projectors</div>
+        <div class="group-card">Cameras</div>
+        <div class="group-card">Tools</div>
+        <div class="group-card">Hotspots</div>
+        <div class="group-card">Board Games</div>
+        <div class="group-card">Books</div>
+        <div class="group-card">Holds</div>
+      </div>
+      <p style="margin-top: 8px; font-size: 0.92em; color: var(--text-light);">Groups are fully customizable &mdash; libraries define their own categories, names, images, and rules.</p>
+
+      <h3>Special Group Types</h3>
+      <ul>
+        <li><strong>HOLDS</strong> &mdash; A group that works exactly like the Hold Locker system. Staff pre-loads items for specific patrons, and patrons pick them up by scanning their library card.</li>
+        <li><strong>RETURNS</strong> &mdash; A dedicated group for processing item returns. When selected, triggers the return workflow instead of checkout.</li>
+        <li><strong>DONATIONS</strong> &mdash; A group for accepting donated items via the locker system.</li>
+      </ul>
+
+      <h3>Group-Level Configuration</h3>
+      <table>
+        <thead><tr><th>Setting</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr><td>Name &amp; Image</td><td>Display name and icon/photo shown on the kiosk group selection screen</td></tr>
+          <tr><td>Patron Allowed Sizes</td><td>Which door sizes patrons can self-select (small, medium, large)</td></tr>
+          <tr><td>Staff Allowed Sizes</td><td>Which door sizes staff can assign when loading items</td></tr>
+          <tr><td>Waiver Text</td><td>HTML waiver that patrons must accept before checkout (optional, per group)</td></tr>
+          <tr><td>Ignore Return Check</td><td>Whether to skip condition inspection when items in this group are returned</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Workflow 1: Staff Adds Item -->
+    <div class="section">
+      <h2>Workflow 1: Staff Adds an Item to a Locker</h2>
+      <p>This is the process when a staff member loads a lendable item into the locker system.</p>
+      <div class="workflow">
+        <div class="workflow-step">
+          <div class="step-connector"><div class="step-dot">1</div><div class="step-line"></div></div>
+          <div class="step-content"><strong>Staff scans item barcode</strong><div class="sub">System identifies it as an item (not a patron or staff card)</div></div>
+        </div>
+        <div class="workflow-step">
+          <div class="step-connector"><div class="step-dot">2</div><div class="step-line"></div></div>
+          <div class="step-content"><strong>Add-Item Wizard opens</strong><div class="sub">Shows the scanned barcode and item title (looked up from the ILS)</div></div>
+        </div>
+        <div class="workflow-step">
+          <div class="step-connector"><div class="step-dot">3</div><div class="step-line"></div></div>
+          <div class="step-content"><strong>Staff selects Item Group</strong><div class="sub">Chooses from the available categories (e.g., Laptops, Projectors). If an item type is defined in the ILS integration, the group is detected automatically.</div></div>
+        </div>
+        <div class="workflow-step">
+          <div class="step-connector"><div class="step-dot">4</div><div class="step-line"></div></div>
+          <div class="step-content"><strong>Staff selects Door Size</strong><div class="sub">Small, Medium, or Large &mdash; based on the physical item size</div></div>
+        </div>
+        <div class="workflow-step">
+          <div class="step-connector"><div class="step-dot">5</div><div class="step-line"></div></div>
+          <div class="step-content"><strong>Staff sets Patron Eligibility</strong><div class="sub"><strong>"All"</strong> &mdash; any patron can check out, or <strong>"Custom"</strong> &mdash; reserved for a specific patron ID</div></div>
+        </div>
+        <div class="workflow-step">
+          <div class="step-connector"><div class="step-dot">6</div><div class="step-line"></div></div>
+          <div class="step-content"><strong>System assigns next available door</strong><div class="sub">Finds an empty door matching the selected size within the chosen group</div></div>
+        </div>
+        <div class="workflow-step">
+          <div class="step-connector"><div class="step-dot">7</div><div class="step-line"></div></div>
+          <div class="step-content"><strong>Locker door opens automatically</strong><div class="sub">Staff places the item inside and closes the door</div></div>
+        </div>
+        <div class="workflow-step">
+          <div class="step-connector"><div class="step-dot">8</div></div>
+          <div class="step-content"><strong>System records the assignment</strong><div class="sub">Item ID, group, door number, patron eligibility, and timestamp are saved to the cloud. The ILS check-in is also performed.</div></div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Workflow 2: Patron Checks Out -->
+    <div class="section">
+      <h2>Workflow 2: Patron Checks Out an Item</h2>
+      <p>This is the self-service experience when a patron wants to borrow an item from the locker. Steps 1&ndash;3 can be performed in alternative order: the patron can scan their library card first and then select an item group, or select an item group first and then scan their card (the system asks to confirm the selection).</p>
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 16px 0;">
+        <div style="border: 1px solid var(--border); border-radius: 8px; padding: 20px; border-top: 4px solid var(--primary);">
+          <h4 style="color: var(--primary-dark); margin-bottom: 12px; text-align: center;">Option A: Scan card first</h4>
+          <ol style="padding-left: 20px; margin: 0;">
+            <li style="margin-bottom: 8px;"><strong>Patron scans their library card</strong><br><span style="font-size: 0.9em; color: var(--text-light);">Barcode, RFID, or manual entry via on-screen keyboard</span></li>
+            <li style="margin-bottom: 8px;"><strong>System authenticates the patron</strong><br><span style="font-size: 0.9em; color: var(--text-light);">Validates against the ILS. Checks for account blocks.</span>
+              <ul style="margin-top: 6px; padding-left: 18px;"><li style="font-size: 0.9em; color: var(--text-light);">If the patron has existing holds, those are shown first.</li></ul>
+            </li>
+            <li><strong>Patron selects an item group</strong><br><span style="font-size: 0.9em; color: var(--text-light);">Browses available categories (e.g., Laptops, Cameras).</span>
+              <ul style="margin-top: 6px; padding-left: 18px;"><li style="font-size: 0.9em; color: var(--text-light);">Confirmation is asked to minimise wrong selections.</li></ul>
+            </li>
+          </ol>
+        </div>
+        <div style="border: 1px solid var(--border); border-radius: 8px; padding: 20px; border-top: 4px solid var(--primary);">
+          <h4 style="color: var(--primary-dark); margin-bottom: 12px; text-align: center;">Option B: Select item first</h4>
+          <ol style="padding-left: 20px; margin: 0;">
+            <li style="margin-bottom: 8px;"><strong>Patron selects an item group</strong><br><span style="font-size: 0.9em; color: var(--text-light);">Browses available categories displayed as cards on the screen.</span></li>
+            <li style="margin-bottom: 8px;"><strong>Patron scans their library card</strong><br><span style="font-size: 0.9em; color: var(--text-light);">Barcode, RFID, or manual entry via on-screen keyboard.</span>
+              <ul style="margin-top: 6px; padding-left: 18px;"><li style="font-size: 0.9em; color: var(--text-light);">If the patron has existing holds, those are shown first.</li></ul>
+            </li>
+            <li><strong>System authenticates and confirms selection</strong><br><span style="font-size: 0.9em; color: var(--text-light);">Validates against the ILS. Asks the patron to confirm the selected group.</span></li>
+          </ol>
+        </div>
+      </div>
+      <div class="workflow">
+        <div class="workflow-step">
+          <div class="step-connector"><div class="step-dot">4</div><div class="step-line"></div></div>
+          <div class="step-content"><strong>Waiver acceptance (if required)</strong><div class="sub">If the group has a waiver, the patron must read and accept it before proceeding. Approval is saved for records.</div></div>
+        </div>
+        <div class="workflow-step">
+          <div class="step-connector"><div class="step-dot">5</div><div class="step-line"></div></div>
+          <div class="step-content"><strong>ILS checkout is processed</strong><div class="sub">The item is checked out to the patron in the library system (Polaris or SIP2)</div></div>
+        </div>
+        <div class="workflow-step">
+          <div class="step-connector"><div class="step-dot">6</div><div class="step-line"></div></div>
+          <div class="step-content"><strong>Locker door opens</strong><div class="sub">The assigned door unlocks. System verifies the door actually opened. Bound/paired doors open simultaneously if configured.</div></div>
+        </div>
+        <div class="workflow-step">
+          <div class="step-connector"><div class="step-dot">7</div><div class="step-line"></div></div>
+          <div class="step-content"><strong>Patron takes the item and closes the door</strong><div class="sub">A re-open door button is displayed in case the door didn't open or closed too early.</div></div>
+        </div>
+        <div class="workflow-step">
+          <div class="step-connector"><div class="step-dot">8</div></div>
+          <div class="step-content"><strong>System updates the locker status</strong><div class="sub">For normal lockers: the locker is cleared and made available for restocking. For permanent lockers: the locker is marked "Checked Out" and reserved for the item's return.</div></div>
+        </div>
+      </div>
+
+      <h3>Permanent Lockers</h3>
+      <div class="callout callout-purple">Some high-value items (e.g., cameras, laptops) can be assigned a <strong>permanent locker</strong>. The locker stays reserved for that specific item even after checkout. When the patron returns the item, it goes back into the same locker. This ensures consistent tracking and easy staff management of expensive equipment.</div>
+    </div>
+
+    <!-- Workflow 3: Patron Returns an Item -->
+    <div class="section">
+      <h2>Workflow 3: Patron Returns an Item</h2>
+      <p>When a patron brings back a borrowed item, the return process works as follows:</p>
+      <div class="workflow">
+        <div class="workflow-step">
+          <div class="step-connector"><div class="step-dot">1</div><div class="step-line"></div></div>
+          <div class="step-content"><strong>Patron scans the item barcode at the kiosk</strong><div class="sub">System recognizes the item as currently checked out</div></div>
+        </div>
+        <div class="workflow-step">
+          <div class="step-connector"><div class="step-dot">2</div><div class="step-line"></div></div>
+          <div class="step-content"><strong>System finds an available return locker</strong><div class="sub">Selects an empty door that matches size requirements. For permanent lockers, routes the item back to its assigned door.</div></div>
+        </div>
+        <div class="workflow-step">
+          <div class="step-connector"><div class="step-dot">3</div><div class="step-line"></div></div>
+          <div class="step-content"><strong>Locker door opens</strong><div class="sub">Patron places the item inside</div></div>
+        </div>
+        <div class="workflow-step">
+          <div class="step-connector"><div class="step-dot">4</div><div class="step-line"></div></div>
+          <div class="step-content"><strong>Condition report (optional)</strong><div class="sub">Patron can report if the item is missing or damaged, and leave a message for staff</div></div>
+        </div>
+        <div class="workflow-step">
+          <div class="step-connector"><div class="step-dot">5</div><div class="step-line"></div></div>
+          <div class="step-content"><strong>Patron closes the door</strong><div class="sub">System monitors door status and waits for it to close (30-second timeout)</div></div>
+        </div>
+        <div class="workflow-step">
+          <div class="step-connector"><div class="step-dot">6</div><div class="step-line"></div></div>
+          <div class="step-content"><strong>ILS check-in is processed</strong><div class="sub">By default, the item is checked back in through the library system once the door is closed. If <strong>delayed check-in</strong> is enabled together with <strong>enforce staff check</strong>, the ILS check-in is deferred until staff completes their condition review, ensuring the item is inspected before being formally returned in the system.</div></div>
+        </div>
+        <div class="workflow-step">
+          <div class="step-connector"><div class="step-dot">7</div></div>
+          <div class="step-content"><strong>System updates locker status</strong><div class="sub">If condition check is enabled, the locker is flagged for staff inspection before the item can be lent again. Otherwise, the item becomes available immediately.</div></div>
+        </div>
+      </div>
+
+      <div class="callout callout-warning"><strong>Locker Full on Return:</strong> If no empty doors are available for a return, the patron sees a friendly message: "Locker is full. Please return the item to the staff desk." The kiosk will indicate which door sizes (if any) are still available.</div>
+      <div class="callout callout-info"><strong>Staff-Only Return:</strong> If the item type is configured so that patron self-return is not allowed, a "Please return this item to staff" message is shown when the item is scanned. The patron is directed to bring the item to the service desk instead.</div>
+    </div>
+
+    <!-- Condition Check -->
+    <div class="section">
+      <h2>Condition Check Workflow</h2>
+      <p>For high-value or sensitive items, the system can enforce a <strong>staff condition check</strong> after every return. This ensures items are inspected before being made available to the next patron.</p>
+      <div class="workflow">
+        <div class="workflow-step">
+          <div class="step-connector"><div class="step-dot">1</div><div class="step-line"></div></div>
+          <div class="step-content"><strong>Patron returns an item</strong><div class="sub">Item is placed in a locker and the door is closed</div></div>
+        </div>
+        <div class="workflow-step">
+          <div class="step-connector"><div class="step-dot">2</div><div class="step-line"></div></div>
+          <div class="step-content"><strong>System flags the locker for inspection</strong><div class="sub">The locker is marked with a "Condition Check" flag. The item is NOT available for checkout yet.</div></div>
+        </div>
+        <div class="workflow-step">
+          <div class="step-connector"><div class="step-dot">3</div><div class="step-line"></div></div>
+          <div class="step-content"><strong>Staff is notified</strong><div class="sub">The SideEvent dashboard shows which lockers need inspection</div></div>
+        </div>
+        <div class="workflow-step">
+          <div class="step-connector"><div class="step-dot">4</div><div class="step-line"></div></div>
+          <div class="step-content"><strong>Staff opens the locker and inspects the item</strong><div class="sub">Verifies the item is complete, undamaged, and ready for the next patron</div></div>
+        </div>
+        <div class="workflow-step">
+          <div class="step-connector"><div class="step-dot">5</div></div>
+          <div class="step-content"><strong>Staff clears the condition check flag</strong><div class="sub">The item becomes available for checkout again</div></div>
+        </div>
+      </div>
+      <div class="callout callout-info"><strong>Patron Damage Reports:</strong> During return, patrons can self-report missing components or damage using checkboxes and a free-text message field. This information is attached to the transaction and visible to staff.</div>
+    </div>
+
+    <!-- Waiver System -->
+    <div class="section">
+      <h2>Waiver System</h2>
+      <p>Each item group can have an optional <strong>waiver</strong> that patrons must accept before checking out an item. This is useful for equipment that requires acknowledgement of usage policies, liability, or care instructions.</p>
+      <h3>How It Works</h3>
+      <ul>
+        <li>Waivers are configured per group as HTML content in the SideEvent dashboard.</li>
+        <li>The waiver text can include dynamic variables such as the patron's name, location, and current date.</li>
+        <li>The patron must read and accept the waiver on-screen before the checkout proceeds.</li>
+        <li>Accepted waivers are stored in the cloud (Firestore and Firebase Storage) for record-keeping.</li>
+      </ul>
+      <div class="callout callout-success"><strong>Example Use Case:</strong> A library lending laptops may require patrons to accept a technology use policy acknowledging that they are responsible for the equipment and agree to return it by the due date.</div>
+    </div>
+
+    <!-- Staff / Admin Login -->
+    <div class="section">
+      <h2>Workflow 4: Staff Login</h2>
+      <p>Staff members access the admin interface via a staff card or PIN.</p>
+      <div class="workflow">
+        <div class="workflow-step">
+          <div class="step-connector"><div class="step-dot">1</div><div class="step-line"></div></div>
+          <div class="step-content"><strong>Staff scans their staff card or enters a PIN</strong><div class="sub">Can also double-tap the welcome screen to trigger the admin login prompt</div></div>
+        </div>
+        <div class="workflow-step">
+          <div class="step-connector"><div class="step-dot">2</div><div class="step-line"></div></div>
+          <div class="step-content"><strong>System authenticates</strong><div class="sub">Validates against stored staff credentials or custom staff PIN</div></div>
+        </div>
+        <div class="workflow-step">
+          <div class="step-connector"><div class="step-dot">3</div></div>
+          <div class="step-content"><strong>Admin panel opens</strong><div class="sub">View locker status and contents, manually open doors, manage items and condition checks, access device settings</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Key Features -->
+    <div class="section">
+      <h2>Key Features</h2>
+      <div class="feature-grid">
+        <div class="feature-card">
+          <h4>Group-Based Organization</h4>
+          <p>Items are organized into customizable groups (Laptops, Cameras, etc.) with per-group settings for sizes, waivers, and condition checks.</p>
+        </div>
+        <div class="feature-card">
+          <h4>Permanent Lockers</h4>
+          <p>High-value items can be assigned a permanent locker that stays reserved through the entire checkout-return cycle, ensuring consistent item tracking.</p>
+        </div>
+        <div class="feature-card">
+          <h4>Waiver &amp; Compliance</h4>
+          <p>Per-group waivers ensure patrons acknowledge usage policies. Accepted waivers are stored for legal/compliance records.</p>
+        </div>
+        <div class="feature-card">
+          <h4>Condition Check Enforcement</h4>
+          <p>Returned items can be flagged for staff inspection before being made available again, protecting high-value equipment.</p>
+        </div>
+        <div class="feature-card">
+          <h4>Multi-Language Support</h4>
+          <p>The kiosk supports multiple languages configured per device. A language selector is displayed on the welcome screen.</p>
+        </div>
+        <div class="feature-card">
+          <h4>Accessibility</h4>
+          <p>Font size controls (+/-) on-screen. ADA door preferences supported. On-screen keyboard for manual card entry.</p>
+        </div>
+        <div class="feature-card">
+          <h4>Idle Slideshow</h4>
+          <p>When idle, the kiosk displays a slideshow of item group images. Configurable auto-rotation timer. Any touch or scan wakes the kiosk.</p>
+        </div>
+        <div class="feature-card">
+          <h4>Full ILS Integration</h4>
+          <p>Every checkout and return is recorded in the library's ILS (Polaris or SIP2), keeping circulation data accurate and synchronized.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Door and Locker Management -->
+    <div class="section">
+      <h2>Door &amp; Locker Management</h2>
+      <h3>Door Sizes</h3>
+      <p>Lockers come in configurable sizes (small, medium, large). Each item group can restrict which sizes are available to patrons and staff, ensuring items are placed in appropriately sized lockers.</p>
+
+      <h3>Door Binding</h3>
+      <p>Some locker configurations use paired doors for oversized items. When a bound door is opened, its partner door opens simultaneously.</p>
+
+      <h3>Door Failure Detection</h3>
+      <p>After every door open command, the system checks (after a 1.5-second delay) whether the door actually unlocked. Failures are logged and reported to the management dashboard. Faulty doors can be disabled to prevent further assignments.</p>
+
+      <h3>Door Close Monitoring</h3>
+      <p>During checkout and return, the system actively monitors whether the patron has closed the door. Once the door is closed, the kiosk automatically returns to the home screen after a short delay.</p>
+    </div>
+
+    <!-- Configuration Settings -->
+    <div class="section">
+      <h2>Configuration Settings</h2>
+      <p>Configured via the SideEvent management dashboard:</p>
+      <table>
+        <thead><tr><th>Setting</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr><td>Languages</td><td>Which languages to offer on the kiosk (e.g., en, es, it)</td></tr>
+          <tr><td>Checkout Timer</td><td>How long the checkout screen stays open (default: 30 seconds)</td></tr>
+          <tr><td>Return Timer</td><td>How long the return screen stays open (default: 30 seconds)</td></tr>
+          <tr><td>Password Required</td><td>Whether patrons must enter a PIN/password in addition to their card number</td></tr>
+          <tr><td>Enforce Return Check</td><td>Whether to require staff inspection of returned items before re-lending</td></tr>
+          <tr><td>Slideshow Timer</td><td>Seconds between auto-rotating group images when idle</td></tr>
+          <tr><td>Scanning Rules</td><td>Patterns to classify barcodes as items, patrons, or staff cards</td></tr>
+          <tr><td>Custom Staff PIN</td><td>Alternative PIN for staff admin access (in addition to staff card)</td></tr>
+          <tr><td>Screen Orientation</td><td>Portrait or landscape display mode</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- System Integration -->
+    <div class="section">
+      <h2>System Integration</h2>
+      <table>
+        <thead><tr><th>System</th><th>Purpose</th></tr></thead>
+        <tbody>
+          <tr><td>ILS (Polaris / SIP2)</td><td>Patron authentication, item checkout, item check-in, hold verification</td></tr>
+          <tr><td>Firebase Cloud</td><td>Real-time device state, locker manifest, group configuration, messaging, waiver storage</td></tr>
+          <tr><td>Locker Hardware</td><td>Physical door locking/unlocking, status monitoring, door close detection</td></tr>
+          <tr><td>SideEvent Dashboard</td><td>Web-based management portal for staff and administrators</td></tr>
+          <tr><td>RFID Readers</td><td>Optional RFID-based item and patron card scanning</td></tr>
+          <tr><td>Barcode Reader</td><td>Barcode-based item and patron card scanning</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Typical Day-to-Day Operations -->
+    <div class="section">
+      <h2>Typical Day-to-Day Operations</h2>
+      <div class="ops-section">
+        <h4>Morning Setup</h4>
+        <ol>
+          <li>Staff verifies locker status via the SideEvent dashboard or by scanning their staff card at the kiosk.</li>
+          <li>Staff clears any condition check flags from previously inspected returns.</li>
+          <li>Staff loads new items by scanning them and using the add-item wizard.</li>
+        </ol>
+      </div>
+      <div class="ops-section">
+        <h4>Throughout the Day</h4>
+        <ul>
+          <li>Patrons arrive, scan their card, select an item category, accept any waivers, and take items from auto-opening lockers.</li>
+          <li>Patrons returning items scan the item barcode, place it in the opened locker, and close the door.</li>
+          <li>Staff monitors the dashboard for condition check alerts and damage reports.</li>
+          <li>Staff restocks returned items (after inspection if required) by clearing the condition check flag.</li>
+        </ul>
+      </div>
+      <div class="ops-section">
+        <h4>Handling Issues</h4>
+        <table>
+          <thead><tr><th>Issue</th><th>Resolution</th></tr></thead>
+          <tbody>
+            <tr><td>Door won't open</td><td>System auto-detects and reports. Staff can manually open via the admin panel.</td></tr>
+            <tr><td>Patron can't log in</td><td>Check for account blocks. Patron can use on-screen keyboard if scanner fails.</td></tr>
+            <tr><td>All lockers full (return)</td><td>Patron is shown a message to return the item at the staff desk instead.</td></tr>
+            <tr><td>Item reported damaged</td><td>Damage report is attached to the transaction. Staff reviews via the dashboard.</td></tr>
+            <tr><td>Condition check pending</td><td>Item remains unavailable until staff inspects and clears the flag.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- LoT vs Hold Comparison -->
+    <div class="section">
+      <h2>LoT vs. Hold Locker &mdash; At a Glance</h2>
+      <table class="compare-table">
+        <thead>
+          <tr><th>Feature</th><th class="compare-hold">Hold Locker</th><th class="compare-lot">Library of Things</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Purpose</td><td>Patron picks up pre-placed holds</td><td>Full checkout &amp; return cycle for equipment</td></tr>
+          <tr><td>Who loads items</td><td>Staff pre-loads for a specific patron</td><td>Staff loads via wizard; available to all or specific patron</td></tr>
+          <tr><td>Patron assignment</td><td>Always a specific patron</td><td>"All" (any patron) or a specific patron</td></tr>
+          <tr><td>Return workflow</td><td>Not applicable (one-way pickup)</td><td>Full return with condition check option</td></tr>
+          <tr><td>Waiver support</td><td>No</td><td>Yes, per item group</td></tr>
+          <tr><td>Condition checks</td><td>No</td><td>Yes, configurable per group</td></tr>
+          <tr><td>Permanent lockers</td><td>No (always freed after pickup)</td><td>Yes (locker stays reserved for the item)</td></tr>
+          <tr><td>Item groups</td><td>Single hold pool</td><td>Multiple named categories</td></tr>
+          <tr><td>ILS integration</td><td>Hold verification only</td><td>Full checkout &amp; check-in on every transaction</td></tr>
+          <tr><td>Hold expiration</td><td>Yes (ILS-based or configured)</td><td>Not applicable (items are lent, not held)</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Summary of User Touchpoints -->
+    <div class="section">
+      <h2>Summary of User Touchpoints</h2>
+      <table>
+        <thead>
+          <tr><th>Action</th><th>Who</th><th>How</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Load item into locker</td><td><span class="badge badge-staff">Staff</span></td><td>Scan item barcode, use add-item wizard to select group, size, and eligibility</td></tr>
+          <tr><td>Check out an item</td><td><span class="badge badge-patron">Patron</span></td><td>Scan library card, select item group, accept waiver, take item from opened locker</td></tr>
+          <tr><td>Return an item</td><td><span class="badge badge-patron">Patron</span></td><td>Scan item barcode, place item in opened locker, close door</td></tr>
+          <tr><td>Report damage</td><td><span class="badge badge-patron">Patron</span></td><td>Use checkboxes and message field during return</td></tr>
+          <tr><td>Inspect returned item</td><td><span class="badge badge-staff">Staff</span></td><td>Check condition check alerts on dashboard, open locker, clear flag after inspection</td></tr>
+          <tr><td>Open admin panel</td><td><span class="badge badge-staff">Staff</span></td><td>Scan staff card or enter staff PIN</td></tr>
+          <tr><td>Change language</td><td><span class="badge badge-patron">Patron</span></td><td>Tap language icon on screen</td></tr>
+          <tr><td>Adjust font size</td><td><span class="badge badge-patron">Patron</span></td><td>Tap +/- buttons on screen</td></tr>
+          <tr><td>Configure groups &amp; waivers</td><td><span class="badge badge-staff">Staff</span></td><td>Use SideEvent web dashboard</td></tr>
+          <tr><td>Manage lockers remotely</td><td><span class="badge badge-staff">Staff</span></td><td>Use SideEvent web dashboard</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+
+  <div class="footer">Library of Things (LoT) Locker Kiosk &mdash; SideEvent Platform</div>
+
+</body>
+</html>

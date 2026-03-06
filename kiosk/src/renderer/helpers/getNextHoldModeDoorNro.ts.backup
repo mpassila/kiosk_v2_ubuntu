@@ -1,0 +1,298 @@
+import _ from 'lodash';
+
+/**
+ * Get available locker count per size preference using RTDB structure
+ * @param device - The device object with thedoors, doorsizes and manifest
+ * @param preference - Locker preference ('ANY', 'TOP2', 'BOTTOM2', 'ADA')
+ * @returns Array of available lock numbers
+ *
+ * Door preference values from RTDB:
+ * - 'high' - High/top shelf doors
+ * - 'low' - Low/bottom shelf doors
+ * - 'all' - Available for any preference
+ * - undefined/null - Defaults to 'all'
+ *
+ * Preference filtering:
+ * - ANY: Includes doors with pref 'all', 'high', 'low', or undefined
+ * - TOP2: Includes doors with pref 'all' or 'high'
+ * - BOTTOM2: Includes doors with pref 'all' or 'low'
+ * - ADA: Includes doors with ada/isADA = true
+ */
+function getAvailableCountPerSize(device: any, preference = 'ANY'): number[] {
+  // Check if device has thedoors array from RTDB
+  if (!device.thedoors || !Array.isArray(device.thedoors)) {
+    console.warn('❌ getAvailableCountPerSize: device.thedoors not found');
+    return [];
+  }
+
+  // Get doorsizes configuration from RTDB to determine valid sizes
+  // Typically: small, medium are valid; large is excluded
+  const validSizes = ['small', 'medium'];
+  if (device.doorsizes && Array.isArray(device.doorsizes)) {
+    // Filter to get sizes that are not "large" or size index < 3
+    const filteredSizes = device.doorsizes
+      .filter((sizeConfig: any) => {
+        // Exclude large sizes (typically index 3 or higher, or name 'large')
+        const sizeName = sizeConfig.name?.toLowerCase();
+        const sizeIndex = sizeConfig.size;
+        return (sizeName !== 'large') && (sizeIndex === undefined || sizeIndex < 3);
+      })
+      .map((sizeConfig: any) => sizeConfig.name?.toLowerCase());
+
+    if (filteredSizes.length > 0) {
+      validSizes.length = 0;
+      validSizes.push(...filteredSizes);
+    }
+  }
+
+  console.log(`📦 Valid door sizes for selection: ${validSizes.join(', ')}`);
+
+  // Get occupied door numbers from manifest.groups.lockers
+  const occupiedDoors = new Set<number>();
+  if (device.manifest?.groups) {
+    for (const groupKey in device.manifest.groups) {
+      const group = device.manifest.groups[groupKey];
+      if (group.lockers) {
+        for (const doorNumber in group.lockers) {
+          occupiedDoors.add(Number(doorNumber));
+        }
+      }
+    }
+  }
+
+  // Filter doors by valid size and availability
+  let availableDoors = device.thedoors.filter((door: any) => {
+    const doorNum = Number(door.doorNumber);
+    const doorSize = door.size?.toLowerCase();
+    return validSizes.includes(doorSize) && !occupiedDoors.has(doorNum);
+  });
+
+  // Apply preference filtering based on door.pref (high, low, all)
+  if (preference === 'ANY') {
+    // Include all doors where pref is undefined, 'all', 'high', or 'low'
+    availableDoors = availableDoors.filter((door: any) =>
+      !door.pref || door.pref === 'all' || door.pref === 'high' || door.pref === 'low'
+    );
+  } else if (preference === 'TOP2') {
+    // TOP2: pref = 'all' or 'high'
+    availableDoors = availableDoors.filter((door: any) =>
+      door.pref === 'all' || door.pref === 'high'
+    );
+  } else if (preference === 'BOTTOM2') {
+    // BOTTOM2: pref = 'all' or 'low'
+    availableDoors = availableDoors.filter((door: any) =>
+      door.pref === 'all' || door.pref === 'low'
+    );
+  } else if (preference === 'ADA') {
+    // ADA: filter by ada or isADA property
+    availableDoors = availableDoors.filter((door: any) =>
+      door.ada === true || door.isADA === true
+    );
+  }
+
+  // Map to door numbers
+  return availableDoors.map((door: any) => Number(door.doorNumber));
+}
+
+/**
+ * Get free locker IDs based on ADA preference and patron preference using RTDB structure
+ * @param device - The device object with thedoors and manifest
+ * @param isADA - Whether to get ADA-accessible lockers
+ * @param patronPreference - Patron's locker size preference
+ * @returns Array of available lock numbers ordered by priority
+ */
+function getFreeLockerIDs(device: any, isADA = false, patronPreference: string | null = null): number[] {
+  // Get available locks based on preference
+  let allLocks = patronPreference ? getAvailableCountPerSize(device, patronPreference) : getAvailableCountPerSize(device);
+
+  if (!device.thedoors || !Array.isArray(device.thedoors)) {
+    console.warn('❌ getFreeLockerIDs: device.thedoors not found');
+    return allLocks;
+  }
+
+  // Create a Set for faster lookup
+  const availableLocksSet = new Set(allLocks);
+
+  if (isADA) {
+    // Get all ADA doors and order by priority
+    const adaDoors = device.thedoors.filter((door: any) =>
+      (door.ada === true || door.isADA === true) && availableLocksSet.has(Number(door.doorNumber))
+    );
+    const prioOrderForAllAda = _.orderBy(adaDoors, (door) => door.prio ?? 999);
+    return prioOrderForAllAda.map((door: any) => Number(door.doorNumber));
+  } else {
+    // Get all doors ordered by priority
+    const allDoors = device.thedoors.filter((door: any) =>
+      availableLocksSet.has(Number(door.doorNumber))
+    );
+    const prioOrderForAll = _.orderBy(allDoors, (door) => door.prio ?? 999);
+
+    let finalAllLockers: number[] = [];
+
+    // First, add non-ADA doors
+    prioOrderForAll.forEach((door: any) => {
+      if (!door.ada && !door.isADA) {
+        finalAllLockers.push(Number(door.doorNumber));
+      }
+    });
+
+    // Then, add ADA doors
+    prioOrderForAll.forEach((door: any) => {
+      if (door.ada === true || door.isADA === true) {
+        finalAllLockers.push(Number(door.doorNumber));
+      }
+    });
+
+    return finalAllLockers;
+  }
+}
+
+/**
+ * Filter and return all empty doors matching specific size and ADA criteria
+ * @param device - The device object with thedoors and manifest
+ * @param size - Door size ('small', 'medium', 'large', 'xlarge', 'xxl')
+ * @param isADA - Whether to filter for ADA-accessible doors only
+ * @returns Array of available door numbers matching the criteria, ordered by priority
+ */
+export function filterSelectedSize(device: any, size: string, isADA: boolean = false): number[] {
+  // Check if device has thedoors array from RTDB
+  if (!device.thedoors || !Array.isArray(device.thedoors)) {
+    console.warn('❌ filterSelectedSize: device.thedoors not found');
+    return [];
+  }
+
+  // Get occupied door numbers from manifest.groups.lockers
+  const occupiedDoors = new Set<number>();
+  if (device.manifest?.groups) {
+    for (const groupKey in device.manifest.groups) {
+      const group = device.manifest.groups[groupKey];
+      if (group.lockers) {
+        for (const doorNumber in group.lockers) {
+          occupiedDoors.add(Number(doorNumber));
+        }
+      }
+    }
+  }
+
+  // Normalize size to lowercase for comparison
+  const normalizedSize = size?.toLowerCase();
+
+  // Filter doors by size, ADA, and availability
+  let matchingDoors = device.thedoors.filter((door: any) => {
+    const doorNum = Number(door.doorNumber);
+    const doorSize = door.size?.toLowerCase();
+    const isOccupied = occupiedDoors.has(doorNum);
+    const matchesSize = doorSize === normalizedSize;
+    const matchesADA = !isADA || door.ada === true || door.isADA === true;
+
+    return matchesSize && matchesADA && !isOccupied;
+  });
+
+  // Order by priority (lower prio value = higher priority)
+  const orderedDoors = _.orderBy(matchingDoors, (door) => door.prio ?? 999);
+
+  // Return array of door numbers
+  const result = orderedDoors.map((door: any) => Number(door.doorNumber));
+
+  console.log(`📦 filterSelectedSize: size=${size}, isADA=${isADA}, found ${result.length} doors`, result);
+
+  return result;
+}
+
+/**
+ * Get the next available locker door number for hold mode
+ * @param device - The device object containing locker configuration
+ * @param isADA - Whether to get an ADA-accessible locker
+ * @param patronPreference - Optional patron preference for locker size/location
+ * @returns The next available lock number, or undefined if none available
+ */
+export function getNextHoldModeDoorNro(
+  device: any,
+  isADA = false,
+  patronPreference: string | null = null
+): number | undefined {
+  const next = _.first(getFreeLockerIDs(device, isADA, patronPreference));
+  return next;
+}
+
+/**
+ * Get available door sizes grouped by normal and ADA
+ * Returns data structure for UI to display available door size options
+ * @param device - The device object with thedoors and manifest
+ * @returns Object with normal and ada arrays containing size options
+ */
+export function getAvailableDoorsWithSizes(device: any): { normal: any[], ada: any[] } {
+  // Check if device has thedoors array from RTDB
+  if (!device.thedoors || !Array.isArray(device.thedoors)) {
+    console.warn('❌ getAvailableDoorsWithSizes: device.thedoors not found');
+    return { normal: [], ada: [] };
+  }
+
+  // Get occupied door numbers from manifest
+  const occupiedDoors = new Set<number>();
+  if (device.manifest?.groups) {
+    for (const groupKey in device.manifest.groups) {
+      const group = device.manifest.groups[groupKey];
+      if (group.lockers) {
+        for (const doorNumber in group.lockers) {
+          occupiedDoors.add(Number(doorNumber));
+        }
+      }
+    }
+  }
+
+  // Get available doors (not occupied)
+  const availableDoors = device.thedoors.filter((door: any) => {
+    const doorNum = Number(door.doorNumber);
+    return !occupiedDoors.has(doorNum);
+  });
+
+  // Group by size and ADA status
+  const sizeMap = new Map<string, { normal: number, ada: number }>();
+
+  availableDoors.forEach((door: any) => {
+    const size = door.size?.toLowerCase() || 'unknown';
+    const isADA = door.ada === true || door.isADA === true;
+
+    if (!sizeMap.has(size)) {
+      sizeMap.set(size, { normal: 0, ada: 0 });
+    }
+
+    const counts = sizeMap.get(size)!;
+    if (isADA) {
+      counts.ada++;
+    } else {
+      counts.normal++;
+    }
+  });
+
+  // Convert to UI format
+  const normal: any[] = [];
+  const ada: any[] = [];
+
+  sizeMap.forEach((counts, size) => {
+    const sizeName = size.charAt(0).toUpperCase() + size.slice(1); // Capitalize
+
+    if (counts.normal > 0) {
+      normal.push({
+        size: size,
+        sizeName: sizeName,
+        typeName: '',
+        count: counts.normal
+      });
+    }
+
+    if (counts.ada > 0) {
+      ada.push({
+        size: size,
+        sizeName: sizeName,
+        typeName: 'ADA',
+        count: counts.ada
+      });
+    }
+  });
+
+  console.log(`📦 Available door sizes - Normal: ${normal.length} types, ADA: ${ada.length} types`, { normal, ada });
+
+  return { normal, ada };
+}

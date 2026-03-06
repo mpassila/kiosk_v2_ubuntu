@@ -1,0 +1,37 @@
+<!DOCTYPE html><html><head><meta charset=utf-8><title>LockerAnywhere</title><script>// Set base href dynamically for production builds so relative paths resolve correctly
+    if (window.location.protocol === 'file:') {
+      const basePath = window.location.href.substring(0, window.location.href.lastIndexOf('/') + 1);
+      const baseElement = document.createElement('base');
+      baseElement.href = basePath;
+      document.head.appendChild(baseElement);
+    }</script><script defer=defer src=./renderer.js></script><link href=./style.css rel=stylesheet></head><body><div id=root></div></body><script>// window.electron.ipcRenderer.once('ipc-example', (arg) => {
+  //   // eslint-disable-next-line no-console
+  //   console.log(arg);
+  // });
+  console.log('INDEX init');
+  window.electron.sideeventNative.initSerialPort();
+
+  // Initialize RFID service (WebSocket to RFID server)
+  console.log('INDEX: Initializing RFID service...');
+  window.electron.sideeventNative.initRfidService().then(function(result) {
+    console.log('INDEX: RFID service init result:', result);
+    if (result && result.success) {
+      console.log('INDEX: RFID service connected, connecting to reader...');
+      window.electron.sideeventNative.connectRfidReader().then(function(connectResult) {
+        console.log('INDEX: RFID reader connect result:', connectResult);
+      }).catch(function(err) {
+        console.error('INDEX: RFID reader connect error:', err);
+      });
+    }
+  }).catch(function(err) {
+    console.error('INDEX: RFID service init error:', err);
+  });
+
+  // Device ID is now read directly from config.ts file in the application
+  // No longer need to call async deviceId() function
+
+
+
+
+
+  // window.electron.ipcRenderer.myPing();</script></html>

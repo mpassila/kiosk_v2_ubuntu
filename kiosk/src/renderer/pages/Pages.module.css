@@ -1,0 +1,21 @@
+.text {
+    font-weight: 600;
+}
+
+.text_link {
+    color: #207de8;
+    text-decoration: none;
+}
+
+.button {
+    background-color: #4caf50;
+    /* Green */
+    border: none;
+    color: white;
+    text-align: center;
+    text-decoration: none;
+    font-size: 30px;
+    height: 60px;
+    width: 60%;
+    border-radius: 15px;
+}

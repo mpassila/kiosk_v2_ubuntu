@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hold Locker Kiosk - Functionality &amp; Workflow Guide</title>
+  <style>
+    :root {
+      --primary: #42A4DE;
+      --primary-dark: #2980b9;
+      --bg: #f8f9fa;
+      --card-bg: #ffffff;
+      --text: #2c3e50;
+      --text-light: #7f8c8d;
+      --border: #e0e0e0;
+      --success: #27ae60;
+      --warning: #f39c12;
+      --danger: #e74c3c;
+      --info: #3498db;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      padding: 0;
+    }
+    .header {
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      color: white;
+      padding: 40px 0;
+      text-align: center;
+    }
+    .header h1 { font-size: 2.2em; font-weight: 700; margin-bottom: 8px; }
+    .header p { font-size: 1.1em; opacity: 0.9; }
+    .container { max-width: 960px; margin: 0 auto; padding: 30px 24px; }
+    .section { background: var(--card-bg); border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); padding: 32px; margin-bottom: 28px; }
+    .section h2 {
+      font-size: 1.5em;
+      color: var(--primary-dark);
+      margin-bottom: 18px;
+      padding-bottom: 10px;
+      border-bottom: 2px solid var(--primary);
+    }
+    .section h3 { font-size: 1.15em; color: var(--text); margin: 20px 0 10px; }
+    p, li { margin-bottom: 8px; }
+    ul, ol { padding-left: 24px; }
+
+    /* Role cards */
+    .role-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 16px; margin-top: 12px; }
+    .role-card {
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 20px;
+      text-align: center;
+      border-top: 4px solid var(--primary);
+    }
+    .role-card .role-icon { font-size: 2em; margin-bottom: 8px; }
+    .role-card h4 { color: var(--primary-dark); margin-bottom: 6px; }
+    .role-card p { font-size: 0.95em; color: var(--text-light); margin: 0; }
+
+    /* Workflow diagrams */
+    .workflow { margin: 16px 0; }
+    .workflow-step {
+      display: flex;
+      align-items: flex-start;
+      margin-bottom: 4px;
+    }
+    .step-connector {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-right: 16px;
+      min-width: 36px;
+    }
+    .step-dot {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: var(--primary);
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 0.85em;
+      flex-shrink: 0;
+    }
+    .step-line {
+      width: 3px;
+      height: 24px;
+      background: var(--primary);
+      opacity: 0.3;
+    }
+    .step-content {
+      background: #f0f7fd;
+      border-radius: 8px;
+      padding: 14px 18px;
+      flex: 1;
+      margin-bottom: 4px;
+    }
+    .step-content strong { color: var(--primary-dark); }
+    .step-content .sub { font-size: 0.9em; color: var(--text-light); margin-top: 4px; }
+
+    /* Tables */
+    table { width: 100%; border-collapse: collapse; margin: 14px 0; }
+    th, td { padding: 12px 16px; text-align: left; border-bottom: 1px solid var(--border); }
+    th { background: #f0f7fd; color: var(--primary-dark); font-weight: 600; white-space: nowrap; }
+    tr:hover td { background: #fafcfe; }
+
+    /* Feature cards */
+    .feature-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; margin-top: 12px; }
+    .feature-card {
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 20px;
+      border-left: 4px solid var(--primary);
+    }
+    .feature-card h4 { color: var(--primary-dark); margin-bottom: 8px; font-size: 1.05em; }
+    .feature-card p { font-size: 0.93em; color: var(--text-light); margin: 0; }
+
+    /* Badge / pill */
+    .badge {
+      display: inline-block;
+      padding: 2px 10px;
+      border-radius: 12px;
+      font-size: 0.8em;
+      font-weight: 600;
+      margin-right: 4px;
+    }
+    .badge-staff { background: #eaf7ef; color: var(--success); }
+    .badge-patron { background: #ebf5fb; color: var(--info); }
+    .badge-admin { background: #fef5e7; color: var(--warning); }
+
+    /* Callout boxes */
+    .callout {
+      border-radius: 8px;
+      padding: 16px 20px;
+      margin: 14px 0;
+      font-size: 0.95em;
+    }
+    .callout-info { background: #ebf5fb; border-left: 4px solid var(--info); }
+    .callout-warning { background: #fef9e7; border-left: 4px solid var(--warning); }
+    .callout-success { background: #eafaf1; border-left: 4px solid var(--success); }
+
+    /* Scan identification */
+    .scan-list { list-style: none; padding: 0; margin-top: 12px; }
+    .scan-list li {
+      display: flex;
+      align-items: center;
+      padding: 12px 16px;
+      margin-bottom: 8px;
+      border-radius: 8px;
+      background: #f7f9fa;
+      border: 1px solid var(--border);
+    }
+    .scan-list li .scan-icon { font-size: 1.5em; margin-right: 14px; }
+    .scan-list li strong { color: var(--text); }
+    .scan-list li span { font-size: 0.92em; color: var(--text-light); margin-left: 4px; }
+
+    /* Day-to-day */
+    .ops-section { margin-bottom: 18px; }
+    .ops-section h4 { color: var(--primary-dark); margin-bottom: 8px; }
+    .ops-section ol, .ops-section ul { margin-bottom: 0; }
+
+    /* Touchpoints table */
+    .touchpoint-who { font-weight: 600; }
+
+    .footer {
+      text-align: center;
+      padding: 24px;
+      color: var(--text-light);
+      font-size: 0.85em;
+    }
+
+    @media print {
+      .header { padding: 20px 0; }
+      .section { box-shadow: none; border: 1px solid #ddd; page-break-inside: avoid; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="header">
+    <h1>Hold Locker Kiosk</h1>
+    <p>Functionality &amp; Workflow Guide</p>
+  </div>
+
+  <div class="container">
+
+    <!-- Overview -->
+    <div class="section">
+      <h2>Overview</h2>
+      <p>The Hold Locker Kiosk provides a self-service system for library patrons to pick up held items from secure lockers. Staff members load items into lockers by scanning them, and patrons retrieve their items by scanning their library card. The system integrates with the library's ILS (Integrated Library System), physical locker hardware, and a cloud-based management dashboard.</p>
+      <div class="callout callout-info"><strong>Configuration:</strong> All settings for the Hold Locker Kiosk are managed through the <strong>SideEvent SaaS</strong> management dashboard.</div>
+    </div>
+
+    <!-- Key Roles -->
+    <div class="section">
+      <h2>Key Roles</h2>
+      <div class="role-grid">
+        <div class="role-card">
+          <div class="role-icon">&#128100;</div>
+          <h4>Staff</h4>
+          <p>Scan held items into available locker doors. Access the admin view for on-site actions such as managing lockers, opening doors, and configuring device settings via the SideEvent dashboard.</p>
+        </div>
+        <div class="role-card">
+          <div class="role-icon">&#128214;</div>
+          <h4>Patron</h4>
+          <p>Scan their library card to pick up items from their assigned locker(s)</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- How the Kiosk Identifies Scans -->
+    <div class="section">
+      <h2>How the Kiosk Identifies Scans</h2>
+      <p>When a barcode or RFID tag is scanned, the system automatically determines what was scanned:</p>
+      <ul class="scan-list">
+        <li>
+          <span class="scan-icon">&#128179;</span>
+          <div><strong>Staff Card</strong> <span>&mdash; Opens the staff/admin interface</span></div>
+        </li>
+        <li>
+          <span class="scan-icon">&#128230;</span>
+          <div><strong>Item Barcode</strong> <span>&mdash; Begins the "load item into locker" workflow</span></div>
+        </li>
+        <li>
+          <span class="scan-icon">&#127915;</span>
+          <div><strong>Patron Card</strong> <span>&mdash; Begins the "pick up holds" workflow</span></div>
+        </li>
+      </ul>
+      <div class="callout callout-info">The identification uses configurable scanning rules set up in the management dashboard, falling back to ILS-based lookup when rules are not conclusive.</div>
+    </div>
+
+    <!-- Workflow 1: Staff Loads an Item -->
+    <div class="section">
+      <h2>Workflow 1: Staff Loads an Item into a Locker</h2>
+      <p>This is the process when a staff member scans a held item at the kiosk.</p>
+      <div class="workflow">
+        <div class="workflow-step">
+          <div class="step-connector"><div class="step-dot">1</div><div class="step-line"></div></div>
+          <div class="step-content"><strong>Staff scans item barcode</strong></div>
+        </div>
+        <div class="workflow-step">
+          <div class="step-connector"><div class="step-dot">2</div><div class="step-line"></div></div>
+          <div class="step-content"><strong>System verifies item is a valid hold</strong><div class="sub">Validates against the ILS (Polaris or SIP2)</div></div>
+        </div>
+        <div class="workflow-step">
+          <div class="step-connector"><div class="step-dot">3</div><div class="step-line"></div></div>
+          <div class="step-content"><strong>System selects the next available locker door</strong><div class="sub">Considers door size, ADA accessibility, and patron preferences. If the patron already has items in a locker, consolidates into the same door.</div></div>
+        </div>
+        <div class="workflow-step">
+          <div class="step-connector"><div class="step-dot">4</div><div class="step-line"></div></div>
+          <div class="step-content"><strong>Locker door opens automatically</strong></div>
+        </div>
+        <div class="workflow-step">
+          <div class="step-connector"><div class="step-dot">5</div><div class="step-line"></div></div>
+          <div class="step-content"><strong>Staff places item inside and closes the door</strong></div>
+        </div>
+        <div class="workflow-step">
+          <div class="step-connector"><div class="step-dot">6</div><div class="step-line"></div></div>
+          <div class="step-content"><strong>System records the assignment</strong><div class="sub">Item ID(s), patron ID, hold expiration date, and door number are saved to the cloud in real time.</div></div>
+        </div>
+        <div class="workflow-step">
+          <div class="step-connector"><div class="step-dot">7</div></div>
+          <div class="step-content"><strong>Kiosk returns to idle</strong><div class="sub">Ready for the next scan.</div></div>
+        </div>
+      </div>
+
+      <h3>What Happens When the Locker Is Full</h3>
+      <ul>
+        <li>If the patron already has a locker with the same hold expiration date, the new item is added to their existing locker.</li>
+        <li>If all lockers are occupied, the staff sees a "No empty doors available" message.</li>
+      </ul>
+
+      <h3>Overflow Shelf (Optional)</h3>
+      <p>When overflow is enabled, items that cannot fit into the locker system are assigned to a physical <strong>overflow shelf</strong> located inside the library. This provides a paperless alternative to turning patrons away when lockers are full.</p>
+      <ul>
+        <li>The overflow shelf is organized by <strong>weekday name</strong> (Monday, Tuesday, Wednesday, etc.), corresponding to the day the item was placed.</li>
+        <li>When no locker doors are available, the system prompts staff to place the item on the appropriate weekday shelf instead.</li>
+        <li>The item is recorded in the system as an overflow assignment, keeping the process fully paperless &mdash; no handwritten labels or slips are needed.</li>
+        <li>When a patron scans their library card at the kiosk to pick up holds, the checkout screen informs them if any of their items are located on the overflow shelf, including which weekday section to look in.</li>
+      </ul>
+      <div class="callout callout-info"><strong>Overflow Pickup Notice:</strong> During patron pickup, the kiosk displays a clear message such as "You also have items on the <em>Wednesday</em> shelf &mdash; please ask at the service desk or check the overflow shelf near the lockers." This ensures patrons collect all their holds even when some did not fit into a locker door.</div>
+
+      <h3>Duplicate Item Detection</h3>
+      <p>If an item that is already in a locker is scanned again, the system displays an informational dialog showing which door the item is in. What happens next depends on who scanned it:</p>
+      <ul>
+        <li><strong>Staff:</strong> The system requests the staff PIN to re-open the door (for verification or replacement).</li>
+        <li><strong>Patron:</strong> The system prompts the patron to enter their patron ID to proceed with collecting their holds.</li>
+      </ul>
+    </div>
+
+    <!-- Workflow 2: Patron Picks Up Holds -->
+    <div class="section">
+      <h2>Workflow 2: Patron Picks Up Their Holds</h2>
+      <p>This is the self-service experience when a patron arrives at the kiosk.</p>
+      <div class="workflow">
+        <div class="workflow-step">
+          <div class="step-connector"><div class="step-dot">1</div><div class="step-line"></div></div>
+          <div class="step-content"><strong>Patron scans their library card</strong><div class="sub">Barcode, RFID, or manual entry via on-screen keyboard</div></div>
+        </div>
+        <div class="workflow-step">
+          <div class="step-connector"><div class="step-dot">2</div><div class="step-line"></div></div>
+          <div class="step-content"><strong>System authenticates the patron</strong><div class="sub">Validates against the ILS. Checks for account blocks (fines, expired card, etc.)</div></div>
+        </div>
+        <div class="workflow-step">
+          <div class="step-connector"><div class="step-dot">3</div><div class="step-line"></div></div>
+          <div class="step-content"><strong>System locates all lockers assigned to this patron</strong></div>
+        </div>
+        <div class="workflow-step">
+          <div class="step-connector"><div class="step-dot">4</div><div class="step-line"></div></div>
+          <div class="step-content"><strong>System processes the checkout</strong><div class="sub">By default, the ILS checkout is processed here before doors open. Items are marked as checked out and removed from the manifest. If any items are assigned to the overflow shelf, a notice is displayed with the weekday section to check.</div></div>
+        </div>
+        <div class="workflow-step">
+          <div class="step-connector"><div class="step-dot">5</div><div class="step-line"></div></div>
+          <div class="step-content"><strong>All assigned doors open automatically</strong><div class="sub">Doors unlock one at a time. System verifies each door actually opened.</div></div>
+        </div>
+        <div class="workflow-step">
+          <div class="step-connector"><div class="step-dot">6</div><div class="step-line"></div></div>
+          <div class="step-content"><strong>Patron retrieves their items</strong><div class="sub">Can tap "Reopen" if a door closed early. Can mark items as "Leave Behind" if unwanted. If any items are on the overflow shelf, the screen reminds the patron to also pick them up from the designated weekday section.</div></div>
+        </div>
+        <div class="workflow-step">
+          <div class="step-connector"><div class="step-dot">7</div><div class="step-line"></div></div>
+          <div class="step-content"><strong>Patron closes all doors or checkout session timer ends</strong><div class="sub">Patron closing all doors is the preferred way to complete the session. If a door is left open after the timer expires, the kiosk displays a call for action prompting the patron to close it. A message is also sent to staff notifying them of the open door.</div></div>
+        </div>
+        <div class="workflow-step">
+          <div class="step-connector"><div class="step-dot">8</div></div>
+          <div class="step-content"><strong>Locker is freed</strong><div class="sub">Items left behind stay in the locker and staff is notified. In <strong>delayed checkout mode</strong>, the ILS checkout is processed here instead of step 4.</div></div>
+        </div>
+      </div>
+
+      <div class="callout callout-success"><strong>Delayed Checkout Mode:</strong> When enabled, the system skips the ILS checkout at step 4 and opens doors immediately, resulting in a faster patron experience. The checkout process runs in the background and completes at step 8 after the patron is done. This is useful for libraries where ILS response times are slow.</div>
+
+      <div class="callout callout-info"><strong>"Leave Behind" Feature:</strong> If a patron doesn't want one of their held items, they can mark it as "Leave Behind" during checkout. The item stays in the locker, the patron ID is flagged with a special marker, and staff is notified to retrieve and re-shelve the item.</div>
+    </div>
+
+    <!-- Workflow 3: Staff / Admin Login -->
+    <div class="section">
+      <h2>Workflow 3: Staff Login</h2>
+      <p>Staff members access the admin interface by scanning a staff card.</p>
+      <div class="workflow">
+        <div class="workflow-step">
+          <div class="step-connector"><div class="step-dot">1</div><div class="step-line"></div></div>
+          <div class="step-content"><strong>Staff scans their staff card or enters admin view PIN manually</strong></div>
+        </div>
+        <div class="workflow-step">
+          <div class="step-connector"><div class="step-dot">2</div><div class="step-line"></div></div>
+          <div class="step-content"><strong>System authenticates via stored credentials</strong></div>
+        </div>
+        <div class="workflow-step">
+          <div class="step-connector"><div class="step-dot">3</div><div class="step-line"></div></div>
+          <div class="step-content"><strong>Admin panel opens &mdash; primary actions</strong><div class="sub">Clean up expired holds, cancelled holds, and left behind items. View locker status and contents.</div></div>
+        </div>
+        <div class="workflow-step">
+          <div class="step-connector"><div class="step-dot">4</div></div>
+          <div class="step-content"><strong>Secondary actions</strong><div class="sub">Manually open doors, access other admin tools and device settings.</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Key Features -->
+    <div class="section">
+      <h2>Key Features</h2>
+      <div class="feature-grid">
+        <div class="feature-card">
+          <h4>Accessibility (ADA)</h4>
+          <p>Patrons can indicate an ADA door preference for lower/accessible locker doors. Font size controls (+/-) are available on-screen for visually impaired users.</p>
+        </div>
+        <div class="feature-card">
+          <h4>Multi-Language Support</h4>
+          <p>The kiosk supports multiple languages configured per device (e.g., English, Spanish, Italian). A language selector is displayed on the welcome screen.</p>
+        </div>
+        <div class="feature-card">
+          <h4>On-Screen Keyboard</h4>
+          <p>Patrons who cannot scan their card can tap the screen to bring up an on-screen keyboard with a 30-second idle timeout. Supports username-only or username + password login.</p>
+        </div>
+        <div class="feature-card">
+          <h4>Idle Screen / Slideshow</h4>
+          <p>When no interaction is occurring, the kiosk displays a welcome video or background image slideshow. Any touch or scan wakes the kiosk immediately.</p>
+        </div>
+        <div class="feature-card">
+          <h4>Offline Mode</h4>
+          <p>If the network is unavailable, patrons can still pick up items already assigned to their locker using cached data. Loading new items is disabled during outages.</p>
+        </div>
+        <div class="feature-card">
+          <h4>Overflow Shelf</h4>
+          <p>When all lockers are full, items can be assigned to a physical overflow shelf organized by weekday. The system tracks overflow items paperlessly and notifies patrons during pickup.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Door and Locker Management -->
+    <div class="section">
+      <h2>Door &amp; Locker Management</h2>
+      <h3>Door Sizes</h3>
+      <p>Lockers can be configured with different sizes (small, medium, large) to accommodate various item types. Staff can select a specific size when loading an item, or the system auto-assigns the next available door.</p>
+
+      <h3>Door Binding</h3>
+      <p>Some locker configurations use paired doors (e.g., a large item spanning two adjacent doors). When a bound door is opened, its partner door opens simultaneously.</p>
+
+      <h3>Door Failure Detection</h3>
+      <p>After every door open command, the system checks (after a 1.5-second delay) whether the door actually unlocked. If a door fails to open:</p>
+      <ul>
+        <li>The failure is logged and reported to the management dashboard.</li>
+        <li>The door is marked as disabled if this happens during staff loading.</li>
+      </ul>
+    </div>
+
+    <!-- Loading Hold Items -->
+    <div class="section">
+      <h2>Loading Hold Items into Locker</h2>
+      <p>Staff scans the item (barcode or RFID) to begin loading. The item is placed into either a new locker or an existing one, depending on the consolidation mode:</p>
+      <ul>
+        <li><strong>Non-smart consolidation:</strong> All items for a patron with the same hold expiration are placed in the same locker.</li>
+        <li><strong>Smart consolidation:</strong> Items with different expiration dates can share the same locker, each tracking its own expiration individually.</li>
+      </ul>
+
+      <h3>Add-Item Session</h3>
+      <p>While the add-item session is open, staff can perform the following actions:</p>
+      <ul>
+        <li><strong>Review content</strong> &mdash; View items currently in the assigned locker.</li>
+        <li><strong>Re-open door</strong> &mdash; Re-open the locker door to adjust or verify placement.</li>
+        <li><strong>Split to new locker</strong> &mdash; Move the last added item to a new locker if the current one is full or the item is too large to fit. After a split, the new door becomes the default for the patron's follow-up items (behavior depends on whether smart consolidation or non-smart consolidation is used).</li>
+      </ul>
+    </div>
+
+    <!-- Hold Expiration -->
+    <div class="section">
+      <h2>Hold Expiration</h2>
+      <ul>
+        <li>Each locker assignment includes an expiration date, sourced from the ILS hold expiration or a configured hold period. In <strong>smart consolidation</strong> mode (optional), each item in a locker has its own individual expiration date.</li>
+        <li>Expired holds are visible in the management dashboard for staff to clear and re-shelve.</li>
+      </ul>
+
+    </div>
+
+    <!-- Hold Cancellation -->
+    <div class="section">
+      <h2>Hold Cancellation</h2>
+      <p>The system runs a background task that monitors the ILS for cancelled holds. When an item in a locker is cancelled, it is automatically flagged and added to the cleanup tool list. Staff then removes only the cancelled item(s) from the locker.</p>
+    </div>
+
+    <!-- Staff Action: Cleanups -->
+    <div class="section">
+      <h2>Staff Action: Cleanups</h2>
+      <p>Staff regularly need to clean up lockers to free space and keep the system running efficiently. The admin panel highlights items that require attention.</p>
+      <table>
+        <thead><tr><th>Cleanup Action</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Expired Holds</strong></td><td>Items whose hold expiration date has passed. Staff opens the locker, retrieves the item, and re-shelves it. The locker is freed for new assignments.</td></tr>
+          <tr><td><strong>Cancelled Holds</strong></td><td>Holds that were cancelled by the patron or the ILS after the item was already placed in a locker. Staff retrieves and re-shelves the item.</td></tr>
+          <tr><td><strong>Left Behind Items</strong></td><td>Items marked as "Leave Behind" by a patron during pickup. Staff is notified, retrieves the item from the locker, and re-shelves it.</td></tr>
+        </tbody>
+      </table>
+      <div class="callout callout-info"><strong>Cleanup Modes:</strong> Without smart consolidation, all items in a locker share the same expiration date, so cleanup opens all flagged doors at once. With <strong>smart consolidation</strong> or <strong>cancelled items</strong> mode, a single locker may contain items that need cleanup alongside valid items. In that case, cleanups are performed one door at a time &mdash; staff opens the door, removes only the expired, cancelled, or left behind items, and closes it. Remaining valid items stay in the locker. If both modes are active, all flagged items in a door are handled in the same pass.</div>
+      <div class="callout callout-warning"><strong>Tip:</strong> Performing cleanups regularly &mdash; ideally at the start and end of each day &mdash; ensures maximum locker availability and prevents overflow.</div>
+    </div>
+
+    <!-- Configuration Settings -->
+    <div class="section">
+      <h2>Configuration Settings</h2>
+      <p>Configured via the SideEvent management dashboard:</p>
+      <table>
+        <thead>
+          <tr><th>Setting</th><th>Description</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Languages</td><td>Which languages to offer on the kiosk (e.g., en, es, it)</td></tr>
+          <tr><td>Checkout Timer</td><td>How long the checkout screen stays open (default: 30 seconds)</td></tr>
+          <tr><td>Password Required</td><td>Whether patrons must enter a PIN/password in addition to their card number</td></tr>
+          <tr><td>Patron Block Check</td><td>Whether to check for account blocks (fines, overdue items) before allowing pickup</td></tr>
+          <tr><td>Hold Period</td><td>Fixed hold duration override, or use the ILS-provided expiration date</td></tr>
+          <tr><td>Scanning Rules</td><td>Patterns to classify barcodes as items, patrons, or staff cards. Alternatively, use ADA (Automatic Data Association) as a mode detection method to determine if a scan is an item or a patron.</td></tr>
+          <tr><td>Door Sizes</td><td>Available door sizes and assignment rules</td></tr>
+          <tr><td>ADA Doors</td><td>Which doors are designated as ADA-accessible</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- System Integration -->
+    <div class="section">
+      <h2>System Integration</h2>
+      <table>
+        <thead>
+          <tr><th>System</th><th>Purpose</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>ILS (Polaris / SIP2)</td><td>Patron authentication, item validation, hold verification</td></tr>
+          <tr><td>Firebase Cloud</td><td>Real-time device state, locker manifest, configuration, messaging</td></tr>
+          <tr><td>Locker Hardware</td><td>Physical door locking/unlocking, status monitoring</td></tr>
+          <tr><td>SideEvent Dashboard</td><td>Web-based management portal for staff and administrators</td></tr>
+          <tr><td>RFID Readers</td><td>Optional RFID-based item and patron card scanning</td></tr>
+          <tr><td>Barcode Reader</td><td>Barcode-based item and patron card scanning</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Typical Day-to-Day Operations -->
+    <div class="section">
+      <h2>Typical Day-to-Day Operations</h2>
+      <div class="ops-section">
+        <h4>Morning Setup</h4>
+        <ol>
+          <li>Staff verifies locker status via the SideEvent dashboard or by scanning their staff card at the kiosk.</li>
+          <li>Staff performs cleanup of expired, cancelled, or left behind items before loading new holds, or when they find it feasible.</li>
+          <li>Staff loads held items by scanning them at the kiosk &mdash; doors open and close as items are placed.</li>
+        </ol>
+      </div>
+      <div class="ops-section">
+        <h4>Throughout the Day</h4>
+        <ul>
+          <li>Patrons arrive, scan their card, retrieve items from the auto-opening lockers, and leave.</li>
+          <li>Staff continues loading new holds as they become available.</li>
+          <li>The dashboard shows real-time locker occupancy and hold status.</li>
+        </ul>
+      </div>
+      <div class="ops-section">
+        <h4>Handling Issues</h4>
+        <table>
+          <thead><tr><th>Issue</th><th>Resolution</th></tr></thead>
+          <tbody>
+            <tr><td>Door won't open</td><td>System auto-detects and reports. Staff can manually open via the admin panel.</td></tr>
+            <tr><td>Patron can't log in</td><td>Check for account blocks. Patron can use on-screen keyboard if scanner fails.</td></tr>
+            <tr><td>Locker full</td><td>Staff is notified. Expired holds should be cleared to free up space. If overflow is enabled, items are assigned to the weekday-labeled overflow shelf instead.</td></tr>
+            <tr><td>Network outage</td><td>Patron pickups continue using cached data. New item loading pauses until connectivity returns.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Summary of User Touchpoints -->
+    <div class="section">
+      <h2>Summary of User Touchpoints</h2>
+      <table>
+        <thead>
+          <tr><th>Action</th><th>Who</th><th>How</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Load item into locker</td><td><span class="badge badge-staff">Staff</span></td><td>Scan item barcode at kiosk</td></tr>
+          <tr><td>Pick up held items</td><td><span class="badge badge-patron">Patron</span></td><td>Scan library card or type card number</td></tr>
+          <tr><td>Open admin panel</td><td><span class="badge badge-staff">Staff</span></td><td>Scan staff card</td></tr>
+          <tr><td>Change language</td><td><span class="badge badge-patron">Patron</span></td><td>Tap language icon on screen</td></tr>
+          <tr><td>Adjust font size</td><td><span class="badge badge-patron">Patron</span></td><td>Tap +/- buttons on screen</td></tr>
+          <tr><td>Report stuck door</td><td><span class="badge badge-patron">Patron</span></td><td>Tap "Report" on checkout screen</td></tr>
+          <tr><td>Leave item behind</td><td><span class="badge badge-patron">Patron</span></td><td>Tap "Leave Behind" next to the item</td></tr>
+          <tr><td>Manage lockers remotely</td><td><span class="badge badge-staff">Staff</span></td><td>Use SideEvent web dashboard</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+
+  <div class="footer">Hold Locker Kiosk &mdash; SideEvent Platform</div>
+
+</body>
+</html>

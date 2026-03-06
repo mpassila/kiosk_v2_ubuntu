@@ -1,0 +1,301 @@
+import { validateItemInfo, sessionLicenseId, sessionDatabaseUrl, kioskConfig } from '../state/shared';
+import { getFirebaseAuth } from '../state/firebase-client';
+
+let allPendingReturnItems: any = {};
+
+/**
+ * Load scanning input settings from Firebase Realtime DB
+ * Path: license_{licenseId}/devices/{deviceKey}/scannedinput
+ */
+async function loadScannedInputSettings() {
+  try {
+    const licenseId = sessionLicenseId.value;
+    const deviceKey = kioskConfig.value?.device?.id;
+    const databaseUrl = sessionDatabaseUrl.value;
+
+    if (!licenseId || !deviceKey || !databaseUrl) {
+      console.warn('⚠️  Cannot load scanning input settings: missing required values');
+      return null;
+    }
+
+    // Get Firebase auth token
+    const auth = getFirebaseAuth();
+    const currentUser = auth.currentUser;
+    if (!currentUser) {
+      console.error('❌ Not authenticated with Firebase');
+      return null;
+    }
+
+    const authToken = await currentUser.getIdToken();
+    const path = `license_${licenseId}/devices/${deviceKey}/scannedinput`;
+    const url = `${databaseUrl}/${path}.json?auth=${authToken}`;
+
+    console.log(`🔍 Loading scanning input settings from Firebase:`, path);
+
+    const response = await fetch(url);
+    if (!response.ok) {
+      console.error(`❌ Failed to load scanning input settings: ${response.status}`);
+      return null;
+    }
+
+    const settings = await response.json();
+    console.log('✅ Loaded scanning input settings:', settings);
+    return settings;
+  } catch (error) {
+    console.error('❌ Error loading scanning input settings:', error);
+    return null;
+  }
+}
+
+/**
+ * Test input against a rule using regex
+ */
+function testInputAgainstRule(input: string, rule: string): boolean {
+  try {
+    const regex = new RegExp(rule);
+    return regex.test(input);
+  } catch (error) {
+    console.error('❌ Invalid regex rule:', rule, error);
+    return false;
+  }
+}
+
+/**
+ * Find item in locker by item ID
+ */
+function findItemIDFromLocker(testedItemId: string, device: any) {
+  for (let groupIndex in device.config.locker.groups) {
+    for (let lockerIndex in device.config.locker.groups[groupIndex].lockers) {
+      if (device.config.locker.groups[groupIndex].lockers[lockerIndex].itemId === testedItemId) {
+        return device.config.locker.groups[groupIndex].lockers[lockerIndex];
+      }
+    }
+  }
+}
+
+/**
+ * Determines if a scanned barcode is an item, patron, staff card, or device return
+ * by checking against Firebase rules, branch rules, and making SIP requests if needed
+ *
+ * @param cardNumber - The scanned barcode
+ * @param branch - The current branch configuration
+ * @param licenseId - The license ID
+ * @param device - The current device configuration
+ * @param callbacks - Optional callbacks for setting library group and processing login
+ * @returns 'isItem', 'isPatron', 'isStaffCard', 'isDeviceReturn', or null
+ */
+export async function adminFeedHoldsMode(
+  cardNumber: string,
+  branch: any,
+  licenseId: number,
+  device: any,
+  callbacks?: {
+    setLibraryOfThingsGroup?: (group: { name: string; groupIndex: number | null }) => void;
+    processLoginUser?: (patronId: string, password: string) => void;
+  }
+): Promise<'isItem' | 'isPatron' | 'isStaffCard' | 'isDeviceReturn' | null> {
+  try {
+    cardNumber = cardNumber.toUpperCase();
+    allPendingReturnItems = {};
+
+    // Load scanning input settings from Firebase
+    const scannedInputSettings = await loadScannedInputSettings();
+
+    if (scannedInputSettings) {
+      console.log('🔍 Testing input against Firebase scanning rules:', cardNumber);
+
+      // Test 1: Staff card (highest priority)
+      if (scannedInputSettings.staffcardEnabled && scannedInputSettings.staffcardRule) {
+        const isStaffCard = testInputAgainstRule(cardNumber, scannedInputSettings.staffcardRule);
+        if (isStaffCard) {
+          console.log('✅ Input matched staff card rule');
+          return 'isStaffCard';
+        }
+      }
+
+      // Test 2: Item
+      if (scannedInputSettings.itemEnabled && scannedInputSettings.itemRule) {
+        const isItem = testInputAgainstRule(cardNumber, scannedInputSettings.itemRule);
+        if (isItem) {
+          console.log('✅ Input matched item rule');
+          return 'isItem';
+        }
+      }
+
+      // Test 3: Patron
+      if (scannedInputSettings.patronEnabled && scannedInputSettings.patronRule) {
+        const isPatron = testInputAgainstRule(cardNumber, scannedInputSettings.patronRule);
+        if (isPatron) {
+          console.log('✅ Input matched patron rule');
+          return 'isPatron';
+        }
+      }
+
+      console.log('⚠️  Input did not match any Firebase scanning rules, falling back to legacy rules');
+    }
+
+    // Legacy fallback rules
+    if (device.config.locker.settings && device.config.locker.is_holdpickup) {
+      if (licenseId === 112) {
+        console.log('Skip is isItem');
+      } else {
+        if (branch.checkin_rules?.apply_rules) {
+          const itemIdLength = branch.checkin_rules.item_digits_length;
+          for (let ruleItem of branch.checkin_rules.rules) {
+            if (itemIdLength && cardNumber.length === itemIdLength) {
+              if (!ruleItem.is_prefix) {
+                if (cardNumber.includes(ruleItem.rule)) {
+                  return 'isItem';
+                }
+              } else {
+                if (cardNumber.includes(ruleItem.rule) && cardNumber.slice(0, ruleItem.rule.length) === ruleItem.rule) {
+                  return 'isItem';
+                }
+              }
+            } else if (!itemIdLength) {
+              if (!ruleItem.is_prefix) {
+                if (cardNumber.includes(ruleItem.rule)) {
+                  return 'isItem';
+                }
+              } else {
+                const lengthStartsAt = ruleItem.rule.includes(':') ? ruleItem.rule.indexOf(':') : undefined;
+                const prefix = lengthStartsAt ? ruleItem.rule.slice(0, lengthStartsAt) : ruleItem.rule;
+                const postfix = lengthStartsAt ? ruleItem.rule.slice(lengthStartsAt + 1) : undefined;
+                const isMultiTest = prefix && postfix;
+                // licenseId === 114
+                if (
+                  licenseId &&
+                  isMultiTest &&
+                  cardNumber.length === +postfix &&
+                  cardNumber.includes(prefix) &&
+                  cardNumber.slice(0, prefix.length) === prefix
+                ) {
+                  // Only for King country 114
+                  // On May 14, 2022 20:13, Cynthia Rivette <ccrivette@kcls.org> wrote:
+                  // Patron barcodes starting with 9 are 10 digits long.  Item barcodes starting with 9 are 8 digits long.
+                  // Cynthia R
+                  return 'isItem';
+                } else if (cardNumber.includes(ruleItem.rule) && cardNumber.slice(0, ruleItem.rule.length) === ruleItem.rule) {
+                  return 'isItem';
+                }
+              }
+            }
+          }
+        }
+      }
+
+      if (branch.login_rules?.apply_rules) {
+        const patronIdLength = branch.login_rules.patron_digits_length;
+
+        for (let ruleItem of branch.login_rules.rules) {
+          ruleItem.rule = ruleItem.rule.toUpperCase();
+
+          if (patronIdLength && cardNumber.length === patronIdLength) {
+            if (!ruleItem.is_prefix) {
+              if (cardNumber.includes(ruleItem.rule)) {
+                return 'isPatron';
+              }
+            } else {
+              if (cardNumber.includes(ruleItem.rule) && cardNumber.slice(0, ruleItem.rule.length) === ruleItem.rule) {
+                return 'isPatron';
+              }
+            }
+          } else if (!patronIdLength) {
+            if (!ruleItem.is_prefix) {
+              if (cardNumber.includes(ruleItem.rule)) {
+                return 'isPatron';
+              }
+            } else {
+              const lengthStartsAt = ruleItem.rule.includes(':') ? ruleItem.rule.indexOf(':') : undefined;
+              const prefix = lengthStartsAt ? ruleItem.rule.slice(0, lengthStartsAt) : ruleItem.rule;
+              const postfix = lengthStartsAt ? ruleItem.rule.slice(lengthStartsAt + 1) : undefined;
+              const isMultiTest = prefix && postfix;
+              // licenseId === 114
+              if (
+                licenseId &&
+                isMultiTest &&
+                cardNumber.length === +postfix &&
+                cardNumber.includes(prefix) &&
+                cardNumber.slice(0, prefix.length) === prefix
+              ) {
+                // Only for King country 114
+                // On May 14, 2022 20:13, Cynthia Rivette <ccrivette@kcls.org> wrote:
+                // Patron barcodes starting with 9 are 10 digits long.  Item barcodes starting with 9 are 8 digits long.
+                // Cynthia R
+                return 'isPatron';
+              } else if (cardNumber.includes(ruleItem.rule) && cardNumber.slice(0, ruleItem.rule.length) === ruleItem.rule) {
+                return 'isPatron';
+              }
+            }
+          }
+        }
+
+        if (licenseId === 112) {
+          // if you came this far, and license is Neosho, just assume it's isItem
+          return 'isItem';
+        }
+      }
+
+      if (!branch.login_rules?.apply_rules && !branch.checkin_rules?.apply_rules && licenseId !== 7) {
+        try {
+          const sipItemInfo: any = {
+            screenMessage: 'Item not found in catalog',
+            titleIdentifier: 'Invalid item',
+            AF: 'Item not found',
+            AG: 'The item does not exist',
+            CY: 'Y',
+            CM: '2025-01-01',
+            CN: '100',
+            CT: '100',
+            CV: '100',
+            CW: '100',
+            CX: '100',
+          }
+
+          const isValidItem = validateItemInfo(sipItemInfo, cardNumber);
+
+          if (
+            isValidItem && !sipItemInfo.screenMessage?.includes('Item not found in catalog') &&
+            isValidItem && !sipItemInfo.titleIdentifier?.includes('Invalid item') &&
+            isValidItem && !sipItemInfo.AF?.includes('Item not found') &&
+            isValidItem && !sipItemInfo.AF?.includes('Please press Request Help for assistance') &&
+            isValidItem && !sipItemInfo.AG?.includes('The item does not exist')
+          ) {
+            return 'isItem';
+          } else {
+            return 'isPatron';
+          }
+        } catch (error) {
+          console.log('Not an item, must be patron... let ILS to fail fo not');
+        }
+        return 'isPatron';
+      }
+
+      if (licenseId !== 7) {
+        return 'isPatron';
+      }
+      return null;
+    } else {
+      // Device return mode
+      if (device.config.locker.scan_to_return) {
+        allPendingReturnItems = findItemIDFromLocker(cardNumber, device);
+
+        if (!!allPendingReturnItems && allPendingReturnItems.patronId) {
+          if (callbacks?.setLibraryOfThingsGroup) {
+            callbacks.setLibraryOfThingsGroup({ name: 'RETURNS', groupIndex: null });
+          }
+          if (callbacks?.processLoginUser) {
+            callbacks.processLoginUser(allPendingReturnItems.patronId, '');
+          }
+          return 'isDeviceReturn';
+        } else {
+          return 'isPatron';
+        }
+      } else {
+        return 'isPatron';
+      }
+    }
+  } catch (error) {
+    return null;
+  }
+}

@@ -1,0 +1,28 @@
+{
+  "name": "electron-react-boilerplate",
+  "version": "4.4.0",
+  "description": "Electron application boilerplate based on React, React Router, Webpack, React Hot Loader for rapid application development",
+  "main": "./dist/main/main.js",
+  "author": {
+    "name": "SideEvent",
+    "email": "mika@sideevent.com",
+    "url": "https://sideevent.com"
+  },
+  "scripts": {
+    "electron-rebuild": "node -r ts-node/register ../../.erb/scripts/electron-rebuild.js",
+    "link-modules": "node -r ts-node/register ../../.erb/scripts/link-modules.ts",
+    "postinstall": "npm run electron-rebuild"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "getmac": "^6.6.0",
+    "moment": "^2.30.1",
+    "node-cmd": "^5.0.0",
+    "redis": "^2.7.1",
+    "request": "^2.88.2",
+    "serialport": "^12.0.0",
+    "serialport-list": "^12.0.0",
+    "systeminformation": "^5.23.2",
+    "ws": "^8.18.3"
+  }
+}

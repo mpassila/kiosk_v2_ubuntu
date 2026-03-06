@@ -6,8 +6,8 @@ KIOSK_DIR="$SCRIPT_DIR/kiosk"
 # Start X server in background, then configure display and launch Electron
 sudo xinit /bin/bash -c '
   sleep 2
-  xrandr --newmode "1024x600_60.00" 63.50 1024 1072 1176 1328 600 603 607 630 -hsync +vsync 2>/dev/null
-  xrandr --addmode HDMI-1 "1024x600_60.00" 2>/dev/null
-  xrandr --output HDMI-1 --mode "1024x600_60.00"
+  xrandr --newmode "1024x768_60.00" 63.50 1024 1072 1176 1328 768 771 775 798 -hsync +vsync 2>/dev/null
+  xrandr --addmode HDMI-1 "1024x768_60.00" 2>/dev/null
+  xrandr --output HDMI-1 --mode "1024x768_60.00" 
   exec /usr/bin/electron "'"$KIOSK_DIR"'/release/app/dist/main/main.js" --no-sandbox --remote-debugging-port=9222 --devtools
 ' -- :0

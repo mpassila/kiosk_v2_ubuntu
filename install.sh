@@ -9,6 +9,7 @@ echo "Installing kiosk dependencies (production only)"
 echo "========================================"
 
 cd "$KIOSK_DIR"
+git pull
 npm install --omit=dev --ignore-scripts
 
 echo ""

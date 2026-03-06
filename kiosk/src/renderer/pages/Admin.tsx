@@ -822,13 +822,8 @@ export default function AdminPage() {
   const [inspectionItem, setInspectionItem] = useState<any>(null);
   const [inspectionLockers, setInspectionLockers] = useState<any[]>([]);
   const [inspectionIndex, setInspectionIndex] = useState(0);
-  const [expiredTimer, setExpiredTimer] = useState(20);
-  const [smartConsolidationTimer, setSmartConsolidationTimer] = useState(20);
-  const [cancelledTimer, setCancelledTimer] = useState(20);
-  const [leftBehindTimer, setLeftBehindTimer] = useState(20);
   const [inspectionTimer, setInspectionTimer] = useState(20);
-  const [timerPaused, setTimerPaused] = useState(false);
-  const [adminViewTimer, setAdminViewTimer] = useState(990);
+  const [adminViewTimer, setAdminViewTimer] = useState(99);
 
   const [modal_showConfirmCleanup, setModal_showConfirmCleanup] = useState(false);
   const [modal_confirmCleanupActionTitle, setModal_confirmCleanupActionTitle] = useState('Cleanup');
@@ -943,72 +938,7 @@ export default function AdminPage() {
   }, []);
 
   useEffect(() => {
-    if (viewRemoveAllExpired && expiredHoldLockers && !timerPaused) {
-      const itemCount = expiredHoldLockers.reduce((acc: number, locker: any) => acc + locker.itemId.split(',').length, 0);
-      const initialTime = itemCount > 4 ? 40 : 20;
-      if (expiredTimer === 20 || expiredTimer === 40) {
-        setExpiredTimer(initialTime);
-      }
-      const interval = setInterval(() => {
-        setExpiredTimer((prev) => {
-          if (prev <= 1) {
-            clearInterval(interval);
-            returnToMainView();
-            return initialTime;
-          }
-          return prev - 1;
-        });
-      }, 1000);
-      return () => clearInterval(interval);
-    }
-  }, [viewRemoveAllExpired, expiredHoldLockers, timerPaused]);
-
-  // Smart consolidation timer removed — now uses cancelledTimer via viewRemoveAllCancelled
-
-  useEffect(() => {
-    if (viewRemoveAllCancelled && cancelledHolds && !timerPaused) {
-      const itemCount = cancelledHolds.removeTitles?.length || 0;
-      const initialTime = itemCount > 4 ? 40 : 20;
-      if (cancelledTimer === 20 || cancelledTimer === 40) {
-        setCancelledTimer(initialTime);
-      }
-      const interval = setInterval(() => {
-        setCancelledTimer((prev) => {
-          if (prev <= 1) {
-            clearInterval(interval);
-            returnToMainView();
-            return initialTime;
-          }
-          return prev - 1;
-        });
-      }, 1000);
-      return () => clearInterval(interval);
-    }
-  }, [viewRemoveAllCancelled, cancelledHolds, timerPaused]);
-
-  useEffect(() => {
-    if (viewRemoveAllLeftBehind && leftBehindLockers && !timerPaused) {
-      const itemCount = leftBehindLockers.reduce((acc: number, locker: any) => acc + locker.itemId.split(',').length, 0);
-      const initialTime = itemCount > 4 ? 40 : 20;
-      if (leftBehindTimer === 20 || leftBehindTimer === 40) {
-        setLeftBehindTimer(initialTime);
-      }
-      const interval = setInterval(() => {
-        setLeftBehindTimer((prev) => {
-          if (prev <= 1) {
-            clearInterval(interval);
-            returnToMainView();
-            return initialTime;
-          }
-          return prev - 1;
-        });
-      }, 1000);
-      return () => clearInterval(interval);
-    }
-  }, [viewRemoveAllLeftBehind, leftBehindLockers, timerPaused]);
-
-  useEffect(() => {
-    if (viewInspection && inspectionItem && !timerPaused) {
+    if (viewInspection && inspectionItem) {
       const initialTime = 60;
       if (inspectionTimer <= 20) {
         setInspectionTimer(initialTime);
@@ -1025,10 +955,12 @@ export default function AdminPage() {
       }, 1000);
       return () => clearInterval(interval);
     }
-  }, [viewInspection, inspectionItem, timerPaused]);
+  }, [viewInspection, inspectionItem]);
 
   // Admin view auto-exit timer - counts down and exits when reaching 0
+  // Pauses during wizard views and cleanup confirmation modal
   useEffect(() => {
+    if (!viewMainView || modal_showConfirmCleanup) return;
     const interval = setInterval(() => {
       setAdminViewTimer((prev) => {
         if (prev <= 1) {
@@ -1040,7 +972,7 @@ export default function AdminPage() {
       });
     }, 1000);
     return () => clearInterval(interval);
-  }, []);
+  }, [viewMainView, modal_showConfirmCleanup]);
 
   // Reset admin timer function - call this on button clicks
   const resetAdminTimer = () => {
@@ -7480,10 +7412,6 @@ const mainHtmlCleanup = () => {
       {/* Admin view auto-exit timer - shown when no modal is open */}
       {viewMainView && <div style={{position: 'fixed', left: '170px', top: '20px', ...getTextStyle({padding: '20px 40px', margin: 'auto', height: 'auto', fontSize: '32px', fontWeight: 'bold', color: 'white', display: 'flex', alignItems: 'center', gap: '10px'})}}><AiOutlineClockCircle color='white' size={40} /> Auto-exit: {adminViewTimer}s</div>}
 
-      {viewRemoveAllExpired && <div style={{position: 'fixed', left: '50%', transform: 'translateX(150px)', top: '20px', ...getTextStyle({padding: '20px 40px', margin: 'auto', height: 'auto', fontSize: '48px', fontWeight: 'bold', color: 'white', display: 'flex', alignItems: 'center', gap: '10px'})}}><AiOutlineClockCircle color='white' size={50} /> {expiredTimer}s</div>}
-      {/* Smart consolidation timer removed — uses cancelledTimer via viewRemoveAllCancelled */}
-      {viewRemoveAllCancelled && <div style={{position: 'fixed', left: '50%', transform: 'translateX(150px)', top: '20px', ...getTextStyle({padding: '20px 40px', margin: 'auto', height: 'auto', fontSize: '48px', fontWeight: 'bold', color: 'white', display: 'flex', alignItems: 'center', gap: '10px'})}}><AiOutlineClockCircle color='white' size={50} /> {cancelledTimer}s</div>}
-      {viewRemoveAllLeftBehind && <div style={{position: 'fixed', left: '50%', transform: 'translateX(150px)', top: '20px', ...getTextStyle({padding: '20px 40px', margin: 'auto', height: 'auto', fontSize: '48px', fontWeight: 'bold', color: 'white', display: 'flex', alignItems: 'center', gap: '10px'})}}><AiOutlineClockCircle color='white' size={50} /> {leftBehindTimer}s</div>}
       {viewInspection && <div style={{position: 'fixed', left: '50%', transform: 'translateX(150px)', top: '20px', ...getTextStyle({padding: '20px 40px', margin: 'auto', height: 'auto', fontSize: '48px', fontWeight: 'bold', color: 'white', display: 'flex', alignItems: 'center', gap: '10px'})}}><AiOutlineClockCircle color='white' size={50} /> {inspectionTimer}s</div>}
 
 

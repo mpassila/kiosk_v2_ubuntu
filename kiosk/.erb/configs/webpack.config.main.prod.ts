@@ -3,7 +3,6 @@
  */
 
 import path from 'path';
-import fs from 'fs';
 import webpack from 'webpack';
 import { merge } from 'webpack-merge';
 import TerserPlugin from 'terser-webpack-plugin';
@@ -32,6 +31,7 @@ const mainConfig: webpack.Configuration = {
 
   entry: {
     main: path.join(webpackPaths.srcMainPath, 'main.ts'),
+    preload: path.join(webpackPaths.srcMainPath, 'preload.js'),
   },
 
   output: {
@@ -78,12 +78,5 @@ const mainConfig: webpack.Configuration = {
     __filename: false,
   },
 };
-
-// Copy preload.js directly without webpack bundling - it runs in Electron's
-// preload context with full Node.js access, so it must use native require()
-const preloadSrc = path.join(webpackPaths.srcMainPath, 'preload.js');
-const preloadDest = path.join(webpackPaths.distMainPath, 'preload.js');
-fs.mkdirSync(path.dirname(preloadDest), { recursive: true });
-fs.copyFileSync(preloadSrc, preloadDest);
 
 export default merge(baseConfig, mainConfig);

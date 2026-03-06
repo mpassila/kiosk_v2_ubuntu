@@ -24,5 +24,8 @@ Section "ServerLayout"
 EndSection
 EOF
 
+# Make scripts executable
+chmod +x "$( cd "$(dirname "$0")" && pwd )"/*.sh
+
 echo ""
 echo "Setup complete. Screen will never sleep or blank."

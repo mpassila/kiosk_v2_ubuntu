@@ -1543,7 +1543,7 @@ const createWindow = async () => {
 
     // Open DevTools if --devtools flag, DEVTOOLS env, or localConfig.kioskDebug is set
     if (process.argv.includes('--devtools') || process.env.DEVTOOLS || localConfig.kioskDebug) {
-      mainWindow.webContents.openDevTools();
+      mainWindow.webContents.openDevTools({ mode: 'bottom' });
     }
   });
 

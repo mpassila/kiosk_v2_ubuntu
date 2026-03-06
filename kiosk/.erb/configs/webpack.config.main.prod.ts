@@ -3,6 +3,7 @@
  */
 
 import path from 'path';
+import fs from 'fs';
 import webpack from 'webpack';
 import { merge } from 'webpack-merge';
 import TerserPlugin from 'terser-webpack-plugin';
@@ -78,45 +79,11 @@ const mainConfig: webpack.Configuration = {
   },
 };
 
-const preloadConfig: webpack.Configuration = {
-  ...devtoolsConfig,
+// Copy preload.js directly without webpack bundling - it runs in Electron's
+// preload context with full Node.js access, so it must use native require()
+const preloadSrc = path.join(webpackPaths.srcMainPath, 'preload.js');
+const preloadDest = path.join(webpackPaths.distMainPath, 'preload.js');
+fs.mkdirSync(path.dirname(preloadDest), { recursive: true });
+fs.copyFileSync(preloadSrc, preloadDest);
 
-  mode: 'production',
-
-  target: 'electron-preload',
-
-  entry: {
-    preload: path.join(webpackPaths.srcMainPath, 'preload.js'),
-  },
-
-  output: {
-    path: webpackPaths.distMainPath,
-    filename: '[name].js',
-  },
-
-  optimization: {
-    minimizer: [
-      new TerserPlugin({
-        parallel: true,
-      }),
-    ],
-  },
-
-  plugins: [
-    new webpack.EnvironmentPlugin({
-      NODE_ENV: 'production',
-      DEBUG_PROD: false,
-      START_MINIMIZED: false,
-    }),
-  ],
-
-  node: {
-    __dirname: false,
-    __filename: false,
-  },
-};
-
-export default [
-  merge(baseConfig, mainConfig),
-  merge(baseConfig, preloadConfig),
-];
+export default merge(baseConfig, mainConfig);

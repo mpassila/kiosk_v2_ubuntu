@@ -1502,6 +1502,7 @@ const createWindow = async () => {
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
       webSecurity: false, // Disable web security to allow Firebase Storage downloads (no CORS)
+      sandbox: false, // Required for preload to use require() on Linux
     },
   });
 
